@@ -1,32 +1,24 @@
-//
-//  PitchPerfectApp.swift
-//  PitchPerfect
-//
-//  Created by Mark Hall on 1/20/25.
-//
-
 import SwiftUI
-import SwiftData
 
 @main
 struct PitchPerfectApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-
+    init() {
+          // Step 1: Configure the audio session
+          Init.configureAudioSession()
+          
+          // Step 2: Load keys data
+          _ = AppDataManager.loadKeysFromJSON()
+          
+          // Step 3: Load key-notes data
+          _ = AppDataManager.loadKeyNotesFromJSON()
+          
+          print("Initialization complete.")
+      }
+    
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(sharedModelContainer)
     }
 }

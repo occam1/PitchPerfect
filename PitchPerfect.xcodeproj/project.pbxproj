@@ -29,9 +29,33 @@
 		4D14781D2D3F3A5700E15A93 /* PitchPerfectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PitchPerfectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		4D14786C2D3F7A4D00E15A93 /* Exceptions for "PitchPerfect" folder in "PitchPerfect" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Resources/keyNotes.json,
+			);
+			target = 4D1478002D3F3A5600E15A93 /* PitchPerfect */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		4D14786D2D3F7A4D00E15A93 /* Exceptions for "PitchPerfect" folder in "Compile Sources" phase from "PitchPerfect" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 4D1477FD2D3F3A5600E15A93 /* Sources */;
+			membershipExceptions = (
+				Resources/keyNotes.json,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4D1478032D3F3A5600E15A93 /* PitchPerfect */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4D14786C2D3F7A4D00E15A93 /* Exceptions for "PitchPerfect" folder in "PitchPerfect" target */,
+				4D14786D2D3F7A4D00E15A93 /* Exceptions for "PitchPerfect" folder in "Compile Sources" phase from "PitchPerfect" target */,
+			);
 			path = PitchPerfect;
 			sourceTree = "<group>";
 		};

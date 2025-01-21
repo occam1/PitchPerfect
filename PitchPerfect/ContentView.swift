@@ -1,61 +1,61 @@
-//
-//  ContentView.swift
-//  PitchPerfect
-//
-//  Created by Mark Hall on 1/20/25.
-//
-
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @StateObject private var pitchCompareModel = PitchCompareModel()
+    @State private var showSettings: Bool = false
+    @State private var users: [UserData] = [] // Placeholder for users data
+    @State private var selectedUser: UserData? = nil // Placeholder for selected user
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
-        }
-    }
+        NavigationView {
+            VStack {
+                // Main Pitch Comparison View
+                PitchComparisonView(model: pitchCompareModel)
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
+                // Simulate Detection Button
+                Button("Simulate Detection") {
+                    let simulatedFrequency = Float.random(in: 400...480) // Simulate a detected frequency
+                    pitchCompareModel.updateDetectedFrequency(simulatedFrequency)
+                }
+                .padding()
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+                // Match Result
+                Text(pitchCompareModel.matchResult)
+                    .font(.title)
+                    .foregroundColor(pitchCompareModel.matchResult == "Matched" ? .green : .red)
+                    .padding()
+
+                Spacer()
+
+                // Settings Button
+                Button(action: {
+                    showSettings = true
+                }) {
+                    Text("Settings")
+                        .font(.headline)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .padding()
+                .sheet(isPresented: $showSettings) {
+                    ConfigurationView(users: $users, selectedUser: $selectedUser, showConfiguration: $showSettings)
+                }
+            }
+            .navigationTitle("PitchPerfect")
+            .onAppear {
+                // Perform Initialization
+                Init.configureAudioSession()
+                AppDataManager.initialize()
             }
         }
     }
 }
 
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }
+
