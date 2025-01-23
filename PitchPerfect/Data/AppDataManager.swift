@@ -10,7 +10,9 @@ import Foundation
 class AppDataManager {
     // Static properties to hold data
     public static var keys: [String] = []
+    public static var enharmonics: [String: [String]] = [:]
     public static var keyNotes: [String: [String]] = [:]
+    public static var noteFrequencies: [String: [Float]] = [:]
 
     // Static initializer to load data
     static func initialize() {
@@ -57,18 +59,58 @@ class AppDataManager {
             let keyNotesData = try JSONDecoder().decode(KeyNotesData.self, from: data)
             return keyNotesData.keyNotes
         } catch {
-            print("Error loading keyNotess.json: \(error)")
+            print("Error loading keyNotes.json: \(error)")
             return [:]
+        }
+    }
+
+
+    static func loadNoteFrequenciesFromJSON() {
+        guard let fileURL = Bundle.main.url(forResource: "noteFrequencies", withExtension: "json") else {
+            print("noteFrequencies.json not found in bundle.")
+            return
+        }
+
+        do {
+            let data = try Data(contentsOf: fileURL)
+            let noteFrequencies = try JSONDecoder().decode([NoteFrequency].self, from: data)
+           // noteFrequencies = decodedData
+            print("Loaded \(noteFrequencies.count) note frequencies.")
+        } catch {
+            print("Error loading noteFrequencies.json: \(error)")
+        }
+    }
+    static func loadEnharmonicsFromJSON() {
+        guard let fileURL = Bundle.main.url(forResource: "enharmonics", withExtension: "json") else {
+            print("enharmonices.json not found in bundle.")
+            return
+        }
+
+        do {
+            let data = try Data(contentsOf: fileURL)
+            let enharmonics = try JSONDecoder().decode([Enharmonics].self, from: data)
+            //enharmonics = decodedData
+            print("Loaded \(enharmonics.count) note enharmonics.")
+        } catch {
+            print("Error loading enharmonics.json: \(error)")
         }
     }
 }
 
 // Struct for keys only
-struct KeysData: Codable {
+struct KeysData: Decodable {
     let keys: [String]
 }
 
 // Struct for keys and their notes
-struct KeyNotesData: Codable {
+struct KeyNotesData: Decodable {
     let keyNotes: [String: [String]]
+}
+struct NoteFrequency: Decodable {
+    let name: String
+    let frequency: Float
+}
+struct Enharmonics: Decodable {
+    let noteName: String
+    let enharmonicName: String
 }

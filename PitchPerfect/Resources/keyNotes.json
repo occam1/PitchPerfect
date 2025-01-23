@@ -1,9 +1,3 @@
-//
-//  keyNotes.json
-//  PitchPerfect
-//
-//  Created by Mark Hall on 1/21/25.
-//
 {
     "keys": {
         "C": ["C", "D", "E", "F", "G", "A", "B"],

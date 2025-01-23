@@ -1,0 +1,22 @@
+//
+//  enharmonics.swift
+//  PitchPerfect
+//
+//  Created by Mark Hall on 1/22/25.
+//
+{
+  "enharmonics": [
+    { "note": "C", "enharmonic": "B#" },
+    { "note": "Db", "enharmonic": "C#" },
+    { "note": "D", "enharmonic": "D" },
+    { "note": "Eb", "enharmonic": "D#" },
+    { "note": "E", "enharmonic": "Fb" },
+    { "note": "F", "enharmonic": "E#" },
+    { "note": "Gb", "enharmonic": "F#" },
+    { "note": "G", "enharmonic": "G" },
+    { "note": "Ab", "enharmonic": "G#" },
+    { "note": "A", "enharmonic": "A" },
+    { "note": "Bb", "enharmonic": "A#" },
+    { "note": "B", "enharmonic": "Cb" }
+  ]
+}

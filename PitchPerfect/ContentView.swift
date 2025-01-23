@@ -1,54 +1,44 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var appManager: AppManager
     @StateObject private var pitchCompareModel = PitchCompareModel()
-    @State private var showSettings: Bool = false
-    @State private var users: [UserData] = [] // Placeholder for users data
-    @State private var selectedUser: UserData? = nil // Placeholder for selected user
+    
+    @State private var showSettings = false
+    @State private var users: [UserData] = [] // Replace UserData with your actual user model type
+    @State private var selectedUser: UserData? = nil
 
     var body: some View {
         NavigationView {
             VStack {
-                // Main Pitch Comparison View
+                // Pitch Comparison View
                 PitchComparisonView(model: pitchCompareModel)
-
-                // Simulate Detection Button
-                Button("Simulate Detection") {
-                    let simulatedFrequency = Float.random(in: 400...480) // Simulate a detected frequency
-                    pitchCompareModel.updateDetectedFrequency(simulatedFrequency)
-                }
-                .padding()
-
-                // Match Result
-                Text(pitchCompareModel.matchResult)
-                    .font(.title)
-                    .foregroundColor(pitchCompareModel.matchResult == "Matched" ? .green : .red)
                     .padding()
 
-                Spacer()
 
-                // Settings Button
-                Button(action: {
-                    showSettings = true
-                }) {
-                    Text("Settings")
-                        .font(.headline)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
-                .padding()
-                .sheet(isPresented: $showSettings) {
-                    ConfigurationView(users: $users, selectedUser: $selectedUser, showConfiguration: $showSettings)
-                }
+
+                Spacer()
             }
             .navigationTitle("PitchPerfect")
-            .onAppear {
-                // Perform Initialization
-                Init.configureAudioSession()
-                AppDataManager.initialize()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Settings") {
+                        showSettings = true
+                        appManager.pauseProcesses()
+                    }
+                }
             }
+            .sheet(isPresented: $showSettings) {
+                ConfigurationView(
+                    users: $users,
+                    selectedUser: $selectedUser,
+                    showConfiguration: $showSettings
+                )
+            }
+        }
+        .onAppear {
+            // Configure the audio session on appear
+            Init.configureAudioSession()
         }
     }
 }
@@ -58,4 +48,3 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
-
