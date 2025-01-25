@@ -30,7 +30,7 @@ struct AdvancedSettingsView: View {
                 // Key Selection Section
                            DisclosureGroup("Key Selection", isExpanded: $isKeySelectionExpanded) {
                                KeyPickerView(
-                                   keys: AppDataManager.loadKeysFromJSON(),
+                                    keys: AppDataManager.loadKeysFromJSON(),
                                    selectedKey: $advancedSettings.selectedKey
                                )
                            }

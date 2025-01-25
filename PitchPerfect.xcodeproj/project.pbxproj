@@ -427,6 +427,7 @@
 				DEVELOPMENT_TEAM = FWZEZ7WYW6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app requires bluetooth access to analyze your voice for pitch matching";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app requires microphone access to analyze your voice for pitch matching.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -458,6 +459,7 @@
 				DEVELOPMENT_TEAM = FWZEZ7WYW6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app requires bluetooth access to analyze your voice for pitch matching";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app requires microphone access to analyze your voice for pitch matching.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

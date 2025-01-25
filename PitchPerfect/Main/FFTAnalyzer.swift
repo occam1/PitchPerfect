@@ -41,12 +41,13 @@ class FFTAnalyzer {
                 // Calculate magnitudes
                 var magnitudes = [Float](repeating: 0.0, count: sampleCount / 2)
                 vDSP_zvmags(&splitComplex, 1, &magnitudes, 1, vDSP_Length(sampleCount / 2))
-
+                //print("magnitude ,\(magnitudes)")
                 // Find the dominant frequency
                 if let maxIndex = magnitudes.firstIndex(of: magnitudes.max() ?? 0) {
-                    let samplingRate: Float = 44100.0 // Example sampling rate
+                    let samplingRate: Float = 48000.0 // Example sampling rate
                     let frequencyResolution = samplingRate / Float(sampleCount)
                     dominantFrequency = Float(maxIndex) * frequencyResolution
+                    print("dominantFrequency , \(dominantFrequency)")
                 }
             }
         }
