@@ -7,27 +7,29 @@
 import SwiftUI
 
 struct PitchComparisonView: View {
-    @ObservedObject var model: PitchCompareModel // Observable model for dynamic updates
+    @ObservedObject var model = PitchCompareModel.shared
 
     var body: some View {
-        VStack {
-            HStack {
-                Text(model.currentNoteLabel) // Label for the note name
-                    .font(.headline)
-                    .frame(width: 50, alignment: .trailing)
-
-                ZStack {
-                    // Generated tone (static line)
-                    LineView(yPosition: model.generatedToneY, color: .blue)
-
-                    // Sung tone (dynamic line)
-                    if let sungToneY = model.sungToneY {
-                        LineView(yPosition: sungToneY, color: .red)
-                    }
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+             
+                // Solid line for the generated frequency
+                 LineView(yPosition: model.generatedToneY, color: .green)
+                     .frame(width: geometry.size.width, height: geometry.size.height)
+                     //.offset(y: -50)
+               
+                ForEach(Array(model.lines.enumerated()), id: \.1.id) { index, line in
+                    let offset = CGFloat(index) * (geometry.size.width / CGFloat(model.maxVisibleLines))
+                    // Add a Text view to indicate rendering
+               
+                  
+                    LineView(yPosition: line.yPosition, color: .blue)
+                        .frame(width: geometry.size.width / CGFloat(model.maxVisibleLines), height: geometry.size.height)
+                        .offset(x: offset)
                 }
-                .frame(height: 100) // Adjust height as needed
-                .border(Color.gray.opacity(0.5)) // Optional border
             }
+            .frame(maxWidth: .infinity, maxHeight: 100)
+            .border(Color.gray)
         }
         .padding()
     }
@@ -42,8 +44,9 @@ struct LineView: View {
             Path { path in
                 let width = geometry.size.width
                 let height = geometry.size.height
-                let y = height - (yPosition * height) // Map y-position to view height
+                let y = -50 + height - (yPosition * height) // Map y-position to view height
 
+                // Draw a horizontal line
                 path.move(to: CGPoint(x: 0, y: y))
                 path.addLine(to: CGPoint(x: width, y: y))
             }
@@ -51,7 +54,6 @@ struct LineView: View {
         }
     }
 }
-
 struct PitchComparisonView_Previews: PreviewProvider {
     static var previews: some View {
         PitchComparisonView(model: PitchCompareModel())

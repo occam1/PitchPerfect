@@ -9,6 +9,7 @@ import Accelerate
 import AVFoundation
 
 class FFTAnalyzer {
+    let pitchCompareModel = PitchCompareModel.shared
     func analyze(buffer: AVAudioPCMBuffer) -> Float? {
         // Extract float channel data
         guard let floatChannelData = buffer.floatChannelData else {
@@ -47,7 +48,14 @@ class FFTAnalyzer {
                     let samplingRate: Float = 48000.0 // Example sampling rate
                     let frequencyResolution = samplingRate / Float(sampleCount)
                     dominantFrequency = Float(maxIndex) * frequencyResolution
-                    print("dominantFrequency , \(dominantFrequency)")
+                    guard let unwrappedFrequency = dominantFrequency else {
+                         print("The optional is nil.")
+                         return
+                     }
+                    print("unwrappedFrequency ,\(unwrappedFrequency)")
+                    self.pitchCompareModel.addFrequencyLine(frequency: unwrappedFrequency)
+                    
+        
                 }
             }
         }

@@ -2,7 +2,8 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var appManager: AppManager
-    @StateObject private var pitchCompareModel = PitchCompareModel()
+    @ObservedObject private var pitchCompareModel = PitchCompareModel.shared
+
     
     @State private var showSettings = false
     @State private var users: [UserData] = [] // Replace UserData with your actual user model type

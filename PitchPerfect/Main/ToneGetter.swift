@@ -23,7 +23,9 @@ class ToneGetter {
             guard let self = self else { return }
             if let dominantFrequency = self.fftAnalyzer.analyze(buffer: buffer) {
                 DispatchQueue.main.async {
+                    print("TG dominantFrequency , \(dominantFrequency)")
                     self.pitchCompareModel.updateDetectedFrequency(dominantFrequency)
+                    self.pitchCompareModel.addFrequencyLine(frequency: dominantFrequency)
                 }
             }
         }

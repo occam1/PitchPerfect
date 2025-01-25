@@ -6,7 +6,7 @@
 //
 
 class PitchCompare {
-
+//probably not used
         static func update(with detectedFrequency: Float, model: PitchCompareModel) {
             model.updateDetectedFrequency(detectedFrequency)
     

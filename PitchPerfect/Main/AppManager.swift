@@ -64,12 +64,15 @@ class AppManager: ObservableObject {
  
     func startProcesses() {
         if !isRunning {
-            Task {
-                print("Starting Task.")
-                toneGetter.startCapture()
-                tonePlayer.startPlayingTone(frequency: 440.0) // Example tone
-                isRunning = true
-            }
+         
+                Task {
+                    print("Starting Task.")
+                    toneGetter.startCapture()
+                    tonePlayer.startPlayingTone(frequency: 440.0) // Example tone
+                    isRunning = true
+                    
+                }
+            
         }
     }
 
