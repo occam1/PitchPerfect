@@ -53,8 +53,7 @@ class FFTAnalyzer {
                          return
                      }
                     print("unwrappedFrequency ,\(unwrappedFrequency)")
-                    self.pitchCompareModel.addFrequencyLine(frequency: unwrappedFrequency)
-                    
+                    self.pitchCompareModel.updateDetectedFrequency(unwrappedFrequency)
         
                 }
             }

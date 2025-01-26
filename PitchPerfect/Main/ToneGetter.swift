@@ -25,7 +25,7 @@ class ToneGetter {
                 DispatchQueue.main.async {
                     print("TG dominantFrequency , \(dominantFrequency)")
                     self.pitchCompareModel.updateDetectedFrequency(dominantFrequency)
-                    self.pitchCompareModel.addFrequencyLine(frequency: dominantFrequency)
+                  
                 }
             }
         }

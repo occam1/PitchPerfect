@@ -8,30 +8,57 @@ import SwiftUI
 
 struct PitchComparisonView: View {
     @ObservedObject var model = PitchCompareModel.shared
-
+    
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
-             
-                // Solid line for the generated frequency
-                 LineView(yPosition: model.generatedToneY, color: .green)
-                     .frame(width: geometry.size.width, height: geometry.size.height)
-                     //.offset(y: -50)
-               
-                ForEach(Array(model.lines.enumerated()), id: \.1.id) { index, line in
+                // Static line for the generated frequency
+                let mappedHeight =  mapFrequencyToYPosition(
+                    frequency: model.generatedFrequency,
+                    referenceFrequency: model.generatedFrequency,
+                    height: 200.0
+                )
+                LineView(yPosition: mappedHeight, color: .green)
+                    .frame(width: geometry.size.width, height: 200)
+               // Text("genfreak, \(model.generatedFrequency)")
+                Text(model.currentNoteLabel)
+                                       .font(.caption)
+                                       .foregroundColor(.red)
+                                       .offset(x: -20)// Adjust as needed
+                             
+                // Detected frequency lines
+                ForEach(Array(model.detectedFrequencies.enumerated()), id: \.0) { index, frequency in
                     let offset = CGFloat(index) * (geometry.size.width / CGFloat(model.maxVisibleLines))
-                    // Add a Text view to indicate rendering
-               
-                  
-                    LineView(yPosition: line.yPosition, color: .blue)
-                        .frame(width: geometry.size.width / CGFloat(model.maxVisibleLines), height: geometry.size.height)
+                    let mappedHeight =  mapFrequencyToYPosition(
+                        frequency: frequency,
+                        referenceFrequency: model.generatedFrequency,
+                        height: 200.0
+                    )
+                    LineView(yPosition: mappedHeight, color: .blue)
+                        .frame(width: geometry.size.width / CGFloat(model.maxVisibleLines), height: 200.0)
                         .offset(x: offset)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: 100)
+            .frame(maxWidth: .infinity, maxHeight: 200)
             .border(Color.gray)
         }
         .padding()
+    }
+    
+    // Map a frequency to a y-position relative to the generated frequency
+    private func mapFrequencyToYPosition(frequency: Float, referenceFrequency: Float, height: CGFloat) -> CGFloat {
+        guard frequency > 0 else { return -1 } // Render off-screen for invalid frequencies
+       
+        // Calculate cents difference
+        let centsDifference = 1200 * log2(frequency / referenceFrequency)
+        
+        // Clip to ±100 cents
+        let clippedCents = max(-100, min(centsDifference, 100))
+        
+        
+        // Map cents difference directly to height
+       // return height * CGFloat((clippedCents + 100) / 200)
+        return height * CGFloat((100 - clippedCents) / 200)
     }
 }
 
@@ -43,10 +70,8 @@ struct LineView: View {
         GeometryReader { geometry in
             Path { path in
                 let width = geometry.size.width
-                let height = geometry.size.height
-                let y = -50 + height - (yPosition * height) // Map y-position to view height
+                let y = yPosition // Directly use pre-mapped position
 
-                // Draw a horizontal line
                 path.move(to: CGPoint(x: 0, y: y))
                 path.addLine(to: CGPoint(x: width, y: y))
             }
@@ -54,6 +79,7 @@ struct LineView: View {
         }
     }
 }
+
 struct PitchComparisonView_Previews: PreviewProvider {
     static var previews: some View {
         PitchComparisonView(model: PitchCompareModel())
