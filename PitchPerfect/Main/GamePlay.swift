@@ -16,12 +16,12 @@ class GamePlay {
         let keys = AppDataManager.loadKeysFromJSON()
         
         // Step 3: Load key-notes data
-        let keyNotes = AppDataManager.loadKeyNotesFromJSON()
+         AppDataManager.loadKeyNotesFromJSON()
         
         // Print to confirm the data is loaded (optional)
         print("Audio session configured.")
         print("Keys: \(keys)")
-        print("Key Notes: \(keyNotes)")
+        print("Key Notes: \(AppDataManager.keyNotes)")
 
         // Continue with the rest of the app logic...
         

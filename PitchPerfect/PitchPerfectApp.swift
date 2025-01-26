@@ -11,7 +11,9 @@ init() {
         _ = AppDataManager.loadKeysFromJSON()
         
         // Step 3: Load key-notes data
-        _ = AppDataManager.loadKeyNotesFromJSON()
+        AppDataManager.loadKeyNotesFromJSON()
+        AppDataManager.loadEnharmonicsFromJSON()
+        AppDataManager.loadNoteFrequenciesFromJSON()
         
         print("Initialization complete.")
     }
