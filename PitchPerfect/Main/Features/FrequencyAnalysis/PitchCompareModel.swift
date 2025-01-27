@@ -17,7 +17,9 @@ class PitchCompareModel: ObservableObject {
     @Published var detectedFrequencies: [Float] = [] // Track the last 5 detected frequencies
 
     let maxVisibleLines = 5 // Number of lines visible at a time
-
+    init() {
+        print("PitchCompareModel initialized")
+    }
     // Update detected frequency
     func updateDetectedFrequency(_ frequency: Float) {
         DispatchQueue.main.async {
@@ -28,6 +30,12 @@ class PitchCompareModel: ObservableObject {
             self.matchResult = self.comparePitches(target: self.generatedFrequency, detected: frequency)
         }
     }
+    func updateGeneratedFrequency(to frequency: Float , label: String) {
+        self.generatedFrequency = frequency
+        self.currentNoteLabel = label
+        print("PCM UpdtLbl currentNoteLabel, \(self.currentNoteLabel)")
+    }
+
 
     // Compare detected frequency with the target
     private func comparePitches(target: Float, detected: Float) -> String {

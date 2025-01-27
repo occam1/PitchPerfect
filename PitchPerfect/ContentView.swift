@@ -13,7 +13,7 @@ struct ContentView: View {
         NavigationView {
             VStack {
                 // Pitch Comparison View
-                PitchComparisonView(model: pitchCompareModel)
+                PitchComparisonView()
                     .padding()
 
 

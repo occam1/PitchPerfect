@@ -9,11 +9,9 @@ import AVFoundation
 
 class ToneGetter {
     private let fftAnalyzer = FFTAnalyzer()
-    private let pitchCompareModel: PitchCompareModel
+    private let pitchCompareModel = PitchCompareModel.shared
 
-    init(model: PitchCompareModel) {
-        self.pitchCompareModel = model
-    }
+ 
 
     func startCapture() {
         let audioSessionManager = AudioSessionManager.shared
@@ -22,7 +20,7 @@ class ToneGetter {
         audioSessionManager.audioBufferCallback = { [weak self] buffer in
             guard let self = self else { return }
             if let dominantFrequency = self.fftAnalyzer.analyze(buffer: buffer) {
-                DispatchQueue.main.async {
+               DispatchQueue.main.async {
                     print("TG dominantFrequency , \(dominantFrequency)")
                     self.pitchCompareModel.updateDetectedFrequency(dominantFrequency)
                   

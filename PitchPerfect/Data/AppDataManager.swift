@@ -9,20 +9,19 @@ import Foundation
 
 class AppDataManager {
     // Static properties to hold data
+    public static let shared = AppDataManager()
     public static var keys: [String] = []
     public static var enharmonics: [String: String] = [:]
     public static var keyNotes: [String: [String]] = [:]
     public static var noteFrequencies: [String: Float] = [:]
     
     // Static initializer to load data
-    static func initialize() {
-        self.keys = loadKeysFromJSON()
+    //static func initialize() {
+        //self.keys = loadKeysFromJSON()
         // self.loadKeyNotesFromJSON()
-        print("calling load enharmonics")
-        self.loadEnharmonicsFromJSON()
-        print("calling load noteFrequencies")
-        self.loadNoteFrequenciesFromJSON()
-    }
+        //self.loadEnharmonicsFromJSON()
+        //self.loadNoteFrequenciesFromJSON()
+    //}
     
     // Static function to access just the keys
     static func getKeys() -> [String] {
@@ -35,19 +34,23 @@ class AppDataManager {
     }
     
     // Private static function to load just the keys
-    public static func loadKeysFromJSON() -> [String] {
+   public static func loadKeysFromJSON() {
+        // Get the URL for the JSON file in the bundle
         guard let fileURL = Bundle.main.url(forResource: "keys", withExtension: "json") else {
             print("keys.json not found in bundle.")
-            return []
+            return
         }
-        
+
         do {
+            // Load the data from the file
             let data = try Data(contentsOf: fileURL)
-            let keysData = try JSONDecoder().decode(KeysData.self, from: data)
-            return keysData.keys.sorted() // Sort keys alphabetically
+
+            // Decode the JSON data into an array of strings
+             keys = try JSONDecoder().decode([String].self, from: data)
+          
         } catch {
-            print("Error loading keys.json: \(error)")
-            return []
+            print("Error loading or decoding keys.json: \(error)")
+            return
         }
     }
     
@@ -55,7 +58,7 @@ class AppDataManager {
     
     static func loadKeyNotesFromJSON()   {
         guard let url = Bundle.main.url(forResource: "keyNotes", withExtension: "json") else {
-            print("KeyNotes.json not found.")
+                print("KeyNotes.json not found.")
             return
         }
         
@@ -64,7 +67,9 @@ class AppDataManager {
             // Decode directly as a dictionary
             let decodedKeyNotes = try JSONDecoder().decode([String: [String]].self, from: data)
             keyNotes = decodedKeyNotes
-            print("Loaded \(keyNotes.count) keys with notes.")
+            if PitchPerfectApp.doDebug {
+                print("Loaded \(keyNotes.count) keys with notes.")
+            }
         } catch {
             print("Error loading keyNotes.json: \(error)")
             return
@@ -72,7 +77,9 @@ class AppDataManager {
     }
     
     static func loadEnharmonicsFromJSON() {
-        print("starting to load Enharmonics")
+        if PitchPerfectApp.doDebug {
+            print("starting to load Enharmonics")
+        }
         guard let fileURL = Bundle.main.url(forResource: "enharmonics", withExtension: "json") else {
             print("enharmonices.json not found in bundle.")
             return
@@ -81,8 +88,9 @@ class AppDataManager {
         do {
             let data = try Data(contentsOf: fileURL)
             let enharmonics = try JSONDecoder().decode([String:String].self, from: data)
-            //enharmonics = decodedData
-            print("Loaded \(enharmonics.count) note enharmonics.")
+            if PitchPerfectApp.doDebug {
+                print("Loaded \(enharmonics.count) note enharmonics.")
+            }
         } catch {
             print("Error loading enharmonics.json: \(error)")
         }
@@ -90,7 +98,9 @@ class AppDataManager {
     
     
     static func loadNoteFrequenciesFromJSON() {
-        print("starting to load Note Frequencies")
+        if PitchPerfectApp.doDebug {
+            print("starting to load Note Frequencies")
+        }
         guard let fileURL = Bundle.main.url(forResource: "noteFrequencies", withExtension: "json") else {
             print("noteFrequencies.json not found in bundle.")
             return
@@ -99,9 +109,10 @@ class AppDataManager {
         do {
             
             let data = try Data(contentsOf: fileURL)
-            let noteFrequencies = try JSONDecoder().decode([String: Float].self, from: data)
-            // noteFrequencies = decodedData
-            print("Loaded \(noteFrequencies.count) note frequencies.")
+            noteFrequencies = try JSONDecoder().decode([String: Float].self, from: data)
+            if PitchPerfectApp.doDebug {
+                print("Loaded \(noteFrequencies.count) note frequencies. ,\(noteFrequencies)")
+            }
         } catch {
             print("Error loading noteFrequencies.json: \(error)")
         }

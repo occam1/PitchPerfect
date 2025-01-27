@@ -11,8 +11,8 @@ class AppManager: ObservableObject {
     static let shared = AppManager() // Define the singleton instance
     let audioSessionManager = AudioSessionManager.shared
     private let tonePlayer = TonePlayer()
-    private let pitchCompareModel = PitchCompareModel()
-    private lazy var toneGetter = ToneGetter(model: pitchCompareModel)
+    private let pitchCompareModel = PitchCompareModel.shared
+    private lazy var toneGetter = ToneGetter()
     private var isRunning = false
 
     public init() {
@@ -70,7 +70,7 @@ class AppManager: ObservableObject {
                     toneGetter.startCapture()
                     tonePlayer.startPlayingTone(frequency: 440.0) // Example tone
                     isRunning = true
-                    
+                    runGameLoop()
                 }
             
         }
@@ -86,5 +86,49 @@ class AppManager: ObservableObject {
 
     func resumeProcesses() {
         startProcesses()
+    }
+    
+    private func runGameLoop() {
+        // Logic for the main game loop
+        if PitchPerfectApp.doDebug {
+            print("AM rGL isRunning ,\(isRunning)")
+        }
+
+        var i = 0
+        var j = 3
+        var label : String
+        while isRunning {
+           
+            print("starting rGL loop")
+            if i < AppDataManager.keys.count - 1
+            {
+                i += 1
+            } else {
+                i = 0
+                if j >= 5 {
+                 j = 2
+                } else {j += 1}
+                
+            }
+            
+            print(" I ,\(i) and J,\(j) ")
+            label = AppDataManager.keys[i] + String(j)
+            print(" I ,\(i) and J,\(j) and LABEL \(label)")
+            guard let frequency = AppDataManager.noteFrequencies[label] else {
+                print("Frequency not found for label: \(label)")
+                continue // Skip the current iteration if frequency is nil
+            }
+            
+                print("Running game loop  updating frequency")
+            
+            
+            //pitchCompareModel.updateCurrentNoteLabel(to: label)
+            DispatchQueue.main.async {
+                self.pitchCompareModel.updateGeneratedFrequency(to: frequency, label: label)
+            }
+            print("Running game loop  playing tone")
+            tonePlayer.startPlayingTone(frequency: frequency,  duration: 5)
+            // Perform tasks like tone generation, frequency analysis, etc.
+        }
     }
 }
