@@ -64,7 +64,9 @@ struct PitchComparisonView: View {
     // Map a frequency to a y-position relative to the generated frequency
     private func mapFrequencyToYPosition(frequency: Float, referenceFrequency: Float, height: CGFloat, label: String) -> CGFloat {
         guard frequency > 0 else { return -1 } // Render off-screen for invalid frequencies
-        print("mapping freq: ,\(frequency) label, \(label)")
+        if PitchPerfectApp.doDebug {
+            print("mapping freq: ,\(frequency) label, \(label)")
+        }
         // Calculate cents difference
         let centsDifference = 1200 * log2(frequency / referenceFrequency)
         
@@ -73,8 +75,10 @@ struct PitchComparisonView: View {
         
         
         // Map cents difference directly to height
-         print("mappedHeight: ,\(height * CGFloat((100 - clippedCents) / 200))")
-        return height * CGFloat((100 - clippedCents) / 200)
+        if PitchPerfectApp.doDebug {
+            print("mappedHeight: ,\(height * CGFloat((100 - clippedCents) / 200))")
+        }
+            return height * CGFloat((100 - clippedCents) / 200)
     }
 }
 

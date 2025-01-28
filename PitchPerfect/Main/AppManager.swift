@@ -89,46 +89,67 @@ class AppManager: ObservableObject {
     }
     
     private func runGameLoop() {
-        // Logic for the main game loop
         if PitchPerfectApp.doDebug {
             print("AM rGL isRunning ,\(isRunning)")
         }
 
         var i = 0
         var j = 3
-        var label : String
+        var label: String
+
         while isRunning {
-           
-            print("starting rGL loop")
-            if i < AppDataManager.keys.count - 1
-            {
+            print("Starting rGL loop")
+            print("automatic , \(pitchCompareModel.isAutomatic) or paused , \(pitchCompareModel.isPaused)")
+            // Handle automatic vs. manual mode
+            //if !pitchCompareModel.isAutomatic {
+              //  print("Manual mode active, waiting for user to press Next")
+                while pitchCompareModel.isPaused && isRunning {
+                    print("pausing , \(pitchCompareModel.isPaused)")
+                   
+                    Thread.sleep(forTimeInterval: 0.1) // Small sleep to avoid high CPU usage
+                }
+                if !isRunning { break } // Exit if the game is stopped while paused
+           // }
+
+            // Update the pitch index
+            if i < AppDataManager.keys.count - 1 {
                 i += 1
             } else {
                 i = 0
-                if j >= 5 {
-                 j = 2
-                } else {j += 1}
-                
+                j = (j >= 5) ? 2 : (j + 1) // Reset j or increment
             }
-            
-            print(" I ,\(i) and J,\(j) ")
+
             label = AppDataManager.keys[i] + String(j)
             print(" I ,\(i) and J,\(j) and LABEL \(label)")
+
+            // Get the frequency for the current label
             guard let frequency = AppDataManager.noteFrequencies[label] else {
                 print("Frequency not found for label: \(label)")
                 continue // Skip the current iteration if frequency is nil
             }
-            
-                print("Running game loop  updating frequency")
-            
-            
-            //pitchCompareModel.updateCurrentNoteLabel(to: label)
+
+            // Update the PitchCompareModel with the generated frequency and label
             DispatchQueue.main.async {
                 self.pitchCompareModel.updateGeneratedFrequency(to: frequency, label: label)
             }
-            print("Running game loop  playing tone")
-            tonePlayer.startPlayingTone(frequency: frequency,  duration: 5)
-            // Perform tasks like tone generation, frequency analysis, etc.
+
+            // Play the tone
+            print("Running game loop, playing tone")
+            tonePlayer.startPlayingTone(frequency: frequency, duration: 8)
+            print("end of GL - automatic , \(pitchCompareModel.isAutomatic) is Paused , \(pitchCompareModel.isPaused)")
+            
+            // Pause between pitches
+              if pitchCompareModel.isAutomatic {
+                  print("Pausing for user to catch their breath")
+                  Thread.sleep(forTimeInterval: 1) // Pause for 2 seconds between pitches
+              } else {
+                  // In manual mode, set isPaused back to true after the pitch
+                  print("dispatching the pause button change to true")
+                    DispatchQueue.main.async {
+                      self.pitchCompareModel.isPaused = true
+                    }
+                }
+            Thread.sleep(forTimeInterval: 1) // Pause for 2 seconds between pitches
         }
     }
 }

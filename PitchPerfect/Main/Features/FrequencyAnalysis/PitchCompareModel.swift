@@ -15,7 +15,9 @@ class PitchCompareModel: ObservableObject {
     @Published var currentNoteLabel: String = "A4" // Default note
     @Published var matchResult: String = "Waiting for input..."
     @Published var detectedFrequencies: [Float] = [] // Track the last 5 detected frequencies
-
+    // Playback control state
+    @Published var isAutomatic: Bool = true // Automatic playback mode
+    @Published var isPaused: Bool = false // Playback paused state
     let maxVisibleLines = 5 // Number of lines visible at a time
     init() {
         print("PitchCompareModel initialized")
