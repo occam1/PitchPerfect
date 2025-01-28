@@ -9,6 +9,7 @@ import Foundation
 
 class AppManager: ObservableObject {
     static let shared = AppManager() // Define the singleton instance
+    let utility = Utility.shared
     let audioSessionManager = AudioSessionManager.shared
     private let tonePlayer = TonePlayer()
     private let pitchCompareModel = PitchCompareModel.shared
@@ -89,13 +90,12 @@ class AppManager: ObservableObject {
     }
     
     private func runGameLoop() {
+        let exerciseManager = ExerciseManager.shared
+        var currentNote: String?
         if PitchPerfectApp.doDebug {
             print("AM rGL isRunning ,\(isRunning)")
         }
 
-        var i = 0
-        var j = 3
-        var label: String
 
         while isRunning {
             print("Starting rGL loop")
@@ -110,24 +110,21 @@ class AppManager: ObservableObject {
                 }
                 if !isRunning { break } // Exit if the game is stopped while paused
            // }
+            // Get the next note from the current exercise
+             guard let nextNote = exerciseManager.currentExercise().nextNote(currentNote: currentNote) else {
+                 exerciseManager.selectNextExercise()
+                 exerciseManager.resetCurrentExercise()
+                 continue
+             }
 
-            // Update the pitch index
-            if i < AppDataManager.keys.count - 1 {
-                i += 1
-            } else {
-                i = 0
-                j = (j >= 5) ? 2 : (j + 1) // Reset j or increment
-            }
-
-            label = AppDataManager.keys[i] + String(j)
-            print(" I ,\(i) and J,\(j) and LABEL \(label)")
-
+             currentNote = nextNote
+          
             // Get the frequency for the current label
-            guard let frequency = AppDataManager.noteFrequencies[label] else {
-                print("Frequency not found for label: \(label)")
+            guard let frequency = AppDataManager.noteFrequencies[nextNote] else {
+                print("Frequency not found for label: \(nextNote)")
                 continue // Skip the current iteration if frequency is nil
             }
-
+            let label = utility.convertToNoteOctave(from: nextNote)
             // Update the PitchCompareModel with the generated frequency and label
             DispatchQueue.main.async {
                 self.pitchCompareModel.updateGeneratedFrequency(to: frequency, label: label)
