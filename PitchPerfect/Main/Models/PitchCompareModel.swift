@@ -9,7 +9,10 @@ import Combine
 
 class PitchCompareModel: ObservableObject {
     static let shared = PitchCompareModel() // Singleton instance
-
+    let speechify = TTSManager.shared
+    var playing = true
+    var elapsedTime = 0.0
+    var startTime = Date()
     // Existing properties
     @Published var generatedFrequency: Float = 440.0 // Example: A4
     @Published var currentNoteLabel: String = "A4" // Default note
@@ -19,6 +22,7 @@ class PitchCompareModel: ObservableObject {
     @Published var isAutomatic: Bool = true // Automatic playback mode
     @Published var isPaused: Bool = false // Playback paused state
     let maxVisibleLines = 5 // Number of lines visible at a time
+    var lastFeedback: String? = nil
     init() {
         print("PitchCompareModel initialized")
     }
@@ -29,13 +33,19 @@ class PitchCompareModel: ObservableObject {
             if self.detectedFrequencies.count > self.maxVisibleLines {
                 self.detectedFrequencies.removeFirst(self.detectedFrequencies.count - self.maxVisibleLines)
             }
-            self.matchResult = self.comparePitches(target: self.generatedFrequency, detected: frequency)
+            if self.playing
+            {
+                self.matchResult = self.comparePitches(target: self.generatedFrequency, detected: frequency)
+            }
         }
+        
     }
-    func updateGeneratedFrequency(to frequency: Float , label: String) {
+    func updateGeneratedFrequency(to frequency: Float , label: String , play: Bool) {
+        self.playing = play
+        lastFeedback = nil
         self.generatedFrequency = frequency
         self.currentNoteLabel = label
-        print("PCM UpdtLbl currentNoteLabel, \(self.currentNoteLabel)")
+        print("PCM UpdtLbl currentNoteLabel, \(self.currentNoteLabel) , \(self.generatedFrequency)")
     }
 
 
@@ -43,12 +53,30 @@ class PitchCompareModel: ObservableObject {
     private func comparePitches(target: Float, detected: Float) -> String {
         let tolerance: Float = 5.0 // Allowable cents difference
         let diff = abs(target - detected)
-
+        
+        // Perform some task
+      
+        
+        print("Elapsed time: \(elapsedTime) seconds")
         if diff < tolerance {
+            let elapsedTime = Date().timeIntervalSince(startTime)
+            if elapsedTime > 0.5 {
+                speechify.speak("good")
+                lastFeedback = "good"
+                startTime = Date()
+             }
             return "Matched"
-        } else if detected > target {
+        } else if detected > target  {
+            if lastFeedback != "sharp"  {
+                speechify.speak("sharp")
+                lastFeedback = "sharp"
+            }
             return "Sharp"
         } else {
+            if  lastFeedback != "flat" {
+                speechify.speak("flat")
+                lastFeedback = "flat"
+            }
             return "Flat"
         }
     }

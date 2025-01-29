@@ -10,10 +10,12 @@ class AudioSessionManager {
     static let shared = AudioSessionManager() // Singleton instance
 
     private let audioEngine = AVAudioEngine()
+    private let eqNode = AVAudioUnitEQ(numberOfBands: 1) // EQ node for filtering
+    
     private(set) var isRecording = false
     private(set) var statusMessage = "Microphone access not requested yet."
 
-    let volumeThreshold: Float = 0.09 // Adjust this value based on your requirements
+    let volumeThreshold: Float = 0.0000009 // Adjust this value based on your requirements
 
     // Computed property for available inputs
     var availableInputs: [AVAudioSessionPortDescription]? {
@@ -24,6 +26,7 @@ class AudioSessionManager {
     var audioBufferCallback: ((AVAudioPCMBuffer) -> Void)?
 
     private init() {
+        configureEQNode() // Configure EQ node at initialization
         // Observe input route changes
         NotificationCenter.default.addObserver(
             self,
@@ -71,33 +74,37 @@ class AudioSessionManager {
         }
     }
 
+    private func configureEQNode() {
+        // Configure EQ for a band-pass filter
+        let eqBand = eqNode.bands[0]
+        eqBand.filterType = .bandPass
+        eqBand.frequency = 1030.0   // Center frequency (Hz)
+        eqBand.bandwidth = 3.32    // Bandwidth in octaves (~60 Hz to 2000 Hz)
+        eqBand.gain = 10.0         // Gain in dB
+        eqBand.bypass = false
+    }
+
     func configureAudioSession() {
         let session = AVAudioSession.sharedInstance()
-        print("Available Inputs: \(availableInputs?.map { $0.portName } ?? ["None"])")
-        print("ASM session sample rate ,\(session.sampleRate)")
 
         do {
             // Configure audio session
             try session.setCategory(.playAndRecord, mode: .default, options: [.allowBluetooth, .allowBluetoothA2DP])
             try session.setActive(true)
 
-            if let bluetoothInput = availableInputs?.first(where: { $0.portType == .bluetoothHFP }) {
-                try session.setPreferredInput(bluetoothInput)
-                statusMessage = "Bluetooth microphone set as input: \(bluetoothInput.portName)"
-            } else {
-                statusMessage = "Bluetooth microphone not found."
-            }
-
-            // Attach and configure audio nodes
+            // Attach nodes
             let inputNode = audioEngine.inputNode
+            audioEngine.attach(eqNode)
 
-            let inputFormat = inputNode.inputFormat(forBus: 0)
-            print("Input Node Format Sample Rate: \(inputFormat.sampleRate)")
+            // Connect nodes: Input -> EQ -> Main Mixer
+            audioEngine.connect(inputNode, to: eqNode, format: inputNode.inputFormat(forBus: 0))
+            audioEngine.connect(eqNode, to: audioEngine.mainMixerNode, format: inputNode.inputFormat(forBus: 0))
+
             // Remove existing tap before installing a new one
             inputNode.removeTap(onBus: 0)
-
-            // Install a tap on the inputNode to capture audio data
-            inputNode.installTap(onBus: 0, bufferSize: 16384, format: inputNode.inputFormat(forBus: 0)) { [weak self] buffer, _ in
+            eqNode.removeTap(onBus: 0) // Remove tap from eqNode
+            // Install a tap on the EQ node  (32768)
+            eqNode.installTap(onBus: 0, bufferSize: 16384 , format: inputNode.inputFormat(forBus: 0)) { [weak self] buffer, _ in
                 guard let self = self else { return }
                 self.processAudio(buffer: buffer)
                 self.audioBufferCallback?(buffer) // Notify the callback
@@ -108,11 +115,9 @@ class AudioSessionManager {
             try audioEngine.start()
 
             isRecording = true
-            statusMessage += "\nAudio engine started successfully."
-            print("Audio engine started successfully.")
+            statusMessage = "Audio engine started successfully."
         } catch {
             statusMessage = "Audio engine couldn't start: \(error.localizedDescription)"
-            print("Error: \(error.localizedDescription)")
         }
     }
 
@@ -142,26 +147,36 @@ class AudioSessionManager {
     func stopAudioSession() {
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
+        eqNode.removeTap(onBus: 0) // Remove tap from eqNode
         isRecording = false
     }
 
     private func processAudio(buffer: AVAudioPCMBuffer) {
         let audioBuffer = buffer.audioBufferList.pointee.mBuffers
         let audioData = audioBuffer.mData?.assumingMemoryBound(to: Float.self)
-        let audioDataArray = UnsafeBufferPointer(start: audioData, count: Int(buffer.frameLength))
+        let audioDataArray = UnsafeMutableBufferPointer(start: audioData, count: Int(buffer.frameLength))
 
-        // Calculate RMS for volume analysis
+        // Apply threshold filtering
         let rms = sqrt(audioDataArray.reduce(0) { $0 + $1 * $1 } / Float(audioDataArray.count))
-
-        DispatchQueue.main.async {
-            if rms > self.volumeThreshold {
+        
+        if rms > self.volumeThreshold {
+            DispatchQueue.main.async {
                 self.statusMessage = "Valid audio data received with RMS: \(rms)"
-              //  print("Valid audio data received with RMS: \(rms)")
-            } else {
-                self.statusMessage = "No valid audio data above threshold."
-               //44100
-                print("No valid audio data above threshold. RMS: \(rms)")
+            }
+        } else {
+            DispatchQueue.main.async {
+                self.statusMessage = "Low audio signal. RMS: \(rms)"
             }
         }
+
+        // Zero out samples below the threshold
+        for i in audioDataArray.indices {
+            if abs(audioDataArray[i]) < self.volumeThreshold {
+                audioDataArray[i] = 0
+            }
+        }
+
+        // Pass the processed buffer to the callback
+        self.audioBufferCallback?(buffer)
     }
 }

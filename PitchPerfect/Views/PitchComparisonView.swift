@@ -8,6 +8,7 @@ import SwiftUI
 
 struct PitchComparisonView: View {
     @ObservedObject var model = PitchCompareModel.shared
+
     
     var body: some View {
         GeometryReader { geometry in
@@ -50,6 +51,7 @@ struct PitchComparisonView: View {
                         height: 200.0,
                         label: model.currentNoteLabel
                     )
+                    
                     LineView(yPosition: mappedHeight, color: .blue)
                         .frame(width: geometry.size.width / CGFloat(model.maxVisibleLines), height: 200.0)
                         .offset(x: offset)
@@ -57,6 +59,8 @@ struct PitchComparisonView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: 200)
             .border(Color.gray)
+       
+            
         }
         .padding()
     }

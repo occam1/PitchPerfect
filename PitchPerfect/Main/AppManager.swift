@@ -127,14 +127,17 @@ class AppManager: ObservableObject {
             let label = utility.convertToNoteOctave(from: nextNote)
             // Update the PitchCompareModel with the generated frequency and label
             DispatchQueue.main.async {
-                self.pitchCompareModel.updateGeneratedFrequency(to: frequency, label: label)
+                self.pitchCompareModel.updateGeneratedFrequency(to: frequency, label: label, play: true)
             }
 
             // Play the tone
-            print("Running game loop, playing tone")
+            print("Running game loop, playing tone refFreq,\(frequency) ")
             tonePlayer.startPlayingTone(frequency: frequency, duration: 8)
             print("end of GL - automatic , \(pitchCompareModel.isAutomatic) is Paused , \(pitchCompareModel.isPaused)")
-            
+            DispatchQueue.main.async {
+                self.pitchCompareModel.updateGeneratedFrequency(to: frequency, label: label, play: false)
+            }
+            tonePlayer.stopPlaying()
             // Pause between pitches
               if pitchCompareModel.isAutomatic {
                   print("Pausing for user to catch their breath")
