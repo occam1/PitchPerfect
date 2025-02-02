@@ -4,12 +4,11 @@ import SwiftUI
 struct PitchPerfectApp: App {
     @Environment(\.scenePhase) var scenePhase
     public static let doDebug = false
-
 init() {
-        
+    
         
         // Step 2: Load AppDataManager data
-        AppDataManager.loadKeysFromJSON()
+        AppDataManager.loadNotesFromJSON()
         AppDataManager.loadKeyNotesFromJSON()
         AppDataManager.loadEnharmonicsFromJSON()
         AppDataManager.loadNoteFrequenciesFromJSON()

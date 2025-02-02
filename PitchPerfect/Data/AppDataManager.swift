@@ -10,7 +10,7 @@ import Foundation
 class AppDataManager {
     // Static properties to hold data
     public static let shared = AppDataManager()
-    public static var keys: [String] = []
+    public static var notes: [String] = []
     public static var enharmonics: [String: String] = [:]
     public static var keyNotes: [String: [String]] = [:]
     public static var noteFrequencies: [String: Float] = [:]
@@ -22,11 +22,7 @@ class AppDataManager {
         //self.loadEnharmonicsFromJSON()
         //self.loadNoteFrequenciesFromJSON()
     //}
-    
-    // Static function to access just the keys
-    static func getKeys() -> [String] {
-        return keys
-    }
+
     
     // Static function to access keys with their notes
     static func getKeyNotes() -> [String: [String]] {
@@ -34,10 +30,10 @@ class AppDataManager {
     }
     
     // Private static function to load just the keys
-   public static func loadKeysFromJSON() {
+   public static func loadNotesFromJSON() {
         // Get the URL for the JSON file in the bundle
-        guard let fileURL = Bundle.main.url(forResource: "keys", withExtension: "json") else {
-            print("keys.json not found in bundle.")
+        guard let fileURL = Bundle.main.url(forResource: "notes", withExtension: "json") else {
+            print("notes.json not found in bundle.")
             return
         }
 
@@ -46,10 +42,10 @@ class AppDataManager {
             let data = try Data(contentsOf: fileURL)
 
             // Decode the JSON data into an array of strings
-             keys = try JSONDecoder().decode([String].self, from: data)
+             notes = try JSONDecoder().decode([String].self, from: data)
           
         } catch {
-            print("Error loading or decoding keys.json: \(error)")
+            print("Error loading or decoding notes.json: \(error)")
             return
         }
     }
@@ -120,11 +116,6 @@ class AppDataManager {
 }
     
 
-
-// Struct for keys only
-struct KeysData: Decodable {
-    let keys: [String]
-}
 
 // Private static function to load keys with their corresponding notes
 struct KeyNotesData: Decodable {

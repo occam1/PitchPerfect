@@ -11,7 +11,7 @@ class ExerciseChromaticStep: Exercise {
 
     init() {
         notes = generateChromaticRange(from: "3C", to: "5D")
-        print("notes, \(AppDataManager.keys)")
+        print("notes, \(AppDataManager.notes)")
         print("mapped notes , \(notes)")
     }
     

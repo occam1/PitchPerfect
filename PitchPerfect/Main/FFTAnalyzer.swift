@@ -28,8 +28,16 @@ class FFTAnalyzer {
             return nil
         }
 
+        // ✅ Generate Hann Window
+        var window = [Float](repeating: 0.0, count: sampleCount)
+        vDSP_hann_window(&window, vDSP_Length(sampleCount), Int32(vDSP_HANN_NORM))
+
+        // ✅ Apply Hann Window
+        var windowedSamples = [Float](repeating: 0.0, count: sampleCount)
+        vDSP_vmul(samples, 1, window, 1, &windowedSamples, 1, vDSP_Length(sampleCount))
+
         // Allocate memory for real and imaginary parts
-        var real = samples
+        var real = windowedSamples  // ✅ Use the windowed samples
         var imaginary = [Float](repeating: 0.0, count: sampleCount)
         var dominantFrequency: Float? = nil
 
