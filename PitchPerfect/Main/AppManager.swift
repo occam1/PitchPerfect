@@ -15,9 +15,33 @@ class AppManager: ObservableObject {
     private let pitchCompareModel = PitchCompareModel.shared
     private lazy var toneGetter = ToneGetter()
     private var isRunning = false
+    @Published var showUserSelection = false  // ✅ Controls the selection screen
+
 
     public init() {
         setupBluetoothAndMicrophone()
+        checkUserStatus()
+    }
+ 
+
+    // ✅ If no user is set, force selection screen
+    func checkUserStatus() {
+        let users = UserDataManager.loadAllUsers()
+        if users.isEmpty {
+            // No users → Require selection
+            showUserSelection = true
+        } else if users.count == 1 {
+            // ✅ Auto-select if there's only one user, but allow creating a new one
+            UserData.setActiveUser(user: users.first!)
+            showUserSelection = false
+        } else {
+            // ✅ Multiple users → Require explicit selection
+            showUserSelection = true
+        }
+    }
+
+    func resetUserSelection() {
+        showUserSelection = true // ✅ Allow switching users from settings
     }
 
     private func setupBluetoothAndMicrophone() {

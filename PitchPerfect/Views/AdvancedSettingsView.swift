@@ -34,27 +34,6 @@ struct AdvancedSettingsView: View {
                                    selectedKey: $advancedSettings.selectedKey
                                )
                            }
-
-           
-
-                // Data Management Section
-                DisclosureGroup("Data Management", isExpanded: $isDataManagementExpanded) {
-                    Picker("Keep data for", selection: $keepLastDays) {
-                        ForEach(retentionPeriods, id: \.self) { days in
-                            Text("\(days) days").tag(days)
-                        }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-
-                    Button("Purge Old Data") {
-                        UserDataManager.purgeOldData(for: &user, keepingLast: keepLastDays)
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.red)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                }
             }
             .navigationTitle("Advanced Settings")
             .toolbar {

@@ -4,49 +4,60 @@
 //
 //  Created by Mark Hall on 1/20/25.
 //
-import SwiftUI
+
+
 import Foundation
 
 class UserDataManager {
-    private static let directory = getDocumentsDirectory()
-    
-        // Purge old data
-        static func purgeOldData(for user: inout UserData, keepingLast days: Int) {
-            let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
-            user.attempts = user.attempts.filter { $0.date >= cutoffDate }
-            saveUserData(user)
-        }
-
-    // Load all user data files
     static func loadAllUsers() -> [UserData] {
+        let directory = getDocumentsDirectory()
+        
         do {
-            let fileURLs = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
-            return try fileURLs.compactMap { url in
-                let data = try Data(contentsOf: url)
-                return try JSONDecoder().decode(UserData.self, from: data)
+            let files = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+            let userFiles = files.filter { $0.pathExtension == "json" }
+            
+            print("📂 Found user files: \(userFiles)")
+            
+            let users = userFiles.compactMap { fileURL -> UserData? in
+                do {
+                    let data = try Data(contentsOf: fileURL)
+                    let user = try JSONDecoder().decode(UserData.self, from: data)
+                    print("✅ Loaded user: \(user.userName)")
+                    return user
+                } catch {
+                    print("❌ Failed to load user at \(fileURL): \(error)")
+                    return nil
+                }
             }
+            
+            return users
         } catch {
-            print("Failed to load user data: \(error.localizedDescription)")
+            print("❌ Failed to list user files: \(error)")
             return []
         }
     }
 
-    // Save user data
-    static func saveUserData(_ userData: UserData) {
-        let fileName = "\(userData.userName).json"
-        let fileURL = directory.appendingPathComponent(fileName)
-
-        do {
-            let data = try JSONEncoder().encode(userData)
-            try data.write(to: fileURL)
-            print("Saved data for \(userData.userName)")
-        } catch {
-            print("Failed to save user data: \(error.localizedDescription)")
-        }
+    static func loadUser(userName: String) -> UserData? {
+        // Load specific user by name
+        return nil // Placeholder for actual loading logic
     }
 
-    // Helper to get the documents directory
-    private static func getDocumentsDirectory() -> URL {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    static func saveUserData(_ user: UserData) {
+        do {
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
+            let data = try encoder.encode(user)
+            let fileURL = getDocumentsDirectory().appendingPathComponent("\(user.userName).json")
+            
+            try data.write(to: fileURL)
+            print("✅ User data saved successfully at \(fileURL)")
+        } catch {
+            print("❌ Failed to save user data: \(error)")
+        }
+    }
+    
+    static func getDocumentsDirectory() -> URL {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
     }
 }

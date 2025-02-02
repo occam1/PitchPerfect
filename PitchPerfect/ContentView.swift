@@ -1,12 +1,14 @@
 import SwiftUI
+import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var appManager: AppManager
     @ObservedObject private var pitchCompareModel = PitchCompareModel.shared
 
     @State private var showSettings = false
-    @State private var users: [UserData] = [] // Replace with actual user model
-    @State private var selectedUser: UserData? = nil
+    @State private var showUserSelection = false
+    @State private var users: [UserData] = []
+    @State private var selectedUser: UserData?
 
     var body: some View {
         NavigationView {
@@ -43,7 +45,7 @@ struct ContentView: View {
 
                 Spacer()
             }
-            .navigationTitle("Pitch Practice")
+            .navigationTitle("Pitch Practice - \(UserData.shared?.userName ?? "No User")")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Settings") {
@@ -59,10 +61,16 @@ struct ContentView: View {
                     showConfiguration: $showSettings
                 )
             }
+            .sheet(isPresented: $showUserSelection) {
+                // ✅ Forces user selection before using the app
+                UserSelectionView(users: $users, selectedUser: $selectedUser, showUserSelection: $showUserSelection)
+            }
         }
         .onAppear {
-            // Configure the audio session on appear
             Init.configureAudioSession()
+            loadUsers()
+            //appManager.checkUserStatus()
+                
         }
     }
 
@@ -70,17 +78,13 @@ struct ContentView: View {
 
     private func toggleMode() {
         pitchCompareModel.isAutomatic.toggle()
-        pitchCompareModel.isPaused = false // Reset paused state when switching modes
+        pitchCompareModel.isPaused = false
     }
 
     private func handlePauseNextResume() {
         if pitchCompareModel.isAutomatic {
             pitchCompareModel.isPaused.toggle()
-            if pitchCompareModel.isPaused {
-                print("Playback paused")
-            } else {
-                print("Playback resumed")
-            }
+            print(pitchCompareModel.isPaused ? "Playback paused" : "Playback resumed")
         } else {
             print("Next pitch")
             pitchCompareModel.isPaused = false
@@ -92,6 +96,19 @@ struct ContentView: View {
             return pitchCompareModel.isPaused ? "Resume" : "Pause"
         } else {
             return "Next"
+        }
+    }
+
+    private func loadUsers() {
+        users = UserDataManager.loadAllUsers() // ✅ Load all users at start
+
+        if let lastUserName = UserDefaults.standard.string(forKey: "lastUser"),
+           let lastUser = users.first(where: { $0.userName == lastUserName }) {
+            UserData.setActiveUser(user: lastUser) // ✅ Set last active user
+            selectedUser = lastUser
+            showUserSelection = true
+        } else {
+            showUserSelection = true // ✅ Force user selection if no last user
         }
     }
 }
