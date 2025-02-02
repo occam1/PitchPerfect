@@ -9,12 +9,12 @@ import AVFoundation
 class AudioSessionManager {
     static let shared = AudioSessionManager() // Singleton instance
 
-    private let audioEngine = AVAudioEngine()
+    public let audioEngine = AVAudioEngine()
     private let eqNode = AVAudioUnitEQ(numberOfBands: 1) // EQ node for filtering
     
     private(set) var isRecording = false
     private(set) var statusMessage = "Microphone access not requested yet."
-
+    let audioSession = AVAudioSession.sharedInstance()
     let volumeThreshold: Float = 0.0000009 // Adjust this value based on your requirements
 
     // Computed property for available inputs

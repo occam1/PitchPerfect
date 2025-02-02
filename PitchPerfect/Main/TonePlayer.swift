@@ -10,11 +10,21 @@ import AVFoundation
 
 class TonePlayer {
     static let shared = TonePlayer() // Define the singleton instance
+    private let pitchCompareModel = PitchCompareModel.shared
     private let audioEngine = AVAudioEngine()
     private let playerNode = AVAudioPlayerNode()
-    private let audioFormat = AVAudioFormat(standardFormatWithSampleRate: 44100.0, channels: 1)!
+    private var sampleRate : Double
+    private var audioFormat : AVAudioFormat
+   
+    
+    private init() {
+        self.sampleRate = pitchCompareModel.detectedSampleRate
+        self.audioFormat = AVAudioFormat(standardFormatWithSampleRate: self.sampleRate, channels: 1)!
+    }
 
+    
     func startPlayingTone(frequency: Float, duration: TimeInterval = 2.0) {
+        
         // Calculate the buffer duration
         let bufferDuration = min(duration, 2.0) // Generate up to 2 seconds at a time
         let buffer = generateToneBuffer(frequency: frequency, duration: bufferDuration)
@@ -50,6 +60,36 @@ class TonePlayer {
         if PitchPerfectApp.doDebug {
             print("Stopped playing tone.")
         }
+        
+    }
+    /// ✅ **Generates a tone that glides between two frequencies over a specified duration**
+    func playGlidingTone(from startFreq: Float, to endFreq: Float, duration: TimeInterval) {
+        let frameCount = AVAudioFrameCount(sampleRate * duration * 2) // Up + Down
+        let format = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channels: 1)!
+
+        let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount)!
+        buffer.frameLength = frameCount
+        let audioBuffer = buffer.floatChannelData![0]
+
+        let halfFrameCount = Int(frameCount / 2) // Precompute to avoid division in loop
+        let invHalfFrameCount = 1.0 / Float(halfFrameCount) // Precompute inverse for multiplication
+        let sampleRateFloat = Float(sampleRate) // Avoid repeated type conversion
+
+        for i in 0..<Int(frameCount) {
+            let frameIndex = Float(i) // Explicitly declare to avoid implicit conversions
+            let isAscending = i < halfFrameCount
+            let progress = Float(i % halfFrameCount) * invHalfFrameCount // Normalize 0 → 1
+
+            let currentFreq: Float = isAscending
+                ? startFreq + (endFreq - startFreq) * progress  // Glide Up
+                : endFreq - (endFreq - startFreq) * progress  // Glide Down
+
+            let phase: Float = (2.0 * .pi * currentFreq * frameIndex) / sampleRateFloat
+            audioBuffer[i] = sin(phase) // Generate the sample
+        }
+
+        playerNode.scheduleBuffer(buffer, at: nil, options: .loops, completionHandler: nil)
+        playerNode.play()
     }
 
     private func scheduleBuffer(buffer: AVAudioPCMBuffer, playTime: TimeInterval) {

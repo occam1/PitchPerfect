@@ -9,6 +9,7 @@ import Combine
 
 class PitchCompareModel: ObservableObject {
     static let shared = PitchCompareModel() // Singleton instance
+    let audioSessionManager = AudioSessionManager.shared
     let speechify = TTSManager.shared
     var playing = true
     var elapsedTime = 0.0
@@ -21,9 +22,17 @@ class PitchCompareModel: ObservableObject {
     // Playback control state
     @Published var isAutomatic: Bool = true // Automatic playback mode
     @Published var isPaused: Bool = false // Playback paused state
+    @Published var isPlayingTone: Bool = false // Tone Player is playing a tone
     let maxVisibleLines = 5 // Number of lines visible at a time
     var lastFeedback: String? = nil
-    init() {
+    
+    @Published var detectedSampleRate: Double
+    @Published var fftSize: Int
+
+    private init() {
+        self.detectedSampleRate = audioSessionManager.audioSession.sampleRate
+        self.fftSize = 32768  // Default; can be adjusted dynamically
+        print("🔍 Detected Sample Rate: \(detectedSampleRate)")
         print("PitchCompareModel initialized")
     }
     // Update detected frequency
@@ -59,24 +68,24 @@ class PitchCompareModel: ObservableObject {
         
         print("Elapsed time: \(elapsedTime) seconds")
         if diff < tolerance {
-            let elapsedTime = Date().timeIntervalSince(startTime)
-            if elapsedTime > 0.5 {
-                speechify.speak("good")
-                lastFeedback = "good"
-                startTime = Date()
-             }
+          //let elapsedTime = Date().timeIntervalSince(startTime)
+          //if elapsedTime > 0.5 {
+          //    speechify.speak("good")
+          //    lastFeedback = "good"
+          //    startTime = Date()
+          // }
             return "Matched"
         } else if detected > target  {
-            if lastFeedback != "sharp"  {
-                speechify.speak("sharp")
-                lastFeedback = "sharp"
-            }
+          // if lastFeedback != "sharp"  {
+          //     speechify.speak("sharp")
+          //     lastFeedback = "sharp"
+          //  }
             return "Sharp"
         } else {
-            if  lastFeedback != "flat" {
-                speechify.speak("flat")
-                lastFeedback = "flat"
-            }
+          // if  lastFeedback != "flat" {
+          //     speechify.speak("flat")
+          //     lastFeedback = "flat"
+          // }
             return "Flat"
         }
     }

@@ -11,7 +11,7 @@ class AppManager: ObservableObject {
     static let shared = AppManager() // Define the singleton instance
     let utility = Utility.shared
     let audioSessionManager = AudioSessionManager.shared
-    private let tonePlayer = TonePlayer()
+    private let tonePlayer = TonePlayer.shared
     private let pitchCompareModel = PitchCompareModel.shared
     private lazy var toneGetter = ToneGetter()
     private var isRunning = false
@@ -128,15 +128,19 @@ class AppManager: ObservableObject {
             // Update the PitchCompareModel with the generated frequency and label
             DispatchQueue.main.async {
                 self.pitchCompareModel.updateGeneratedFrequency(to: frequency, label: label, play: true)
+
             }
 
             // Play the tone
             print("Running game loop, playing tone refFreq,\(frequency) ")
+            
+            
             tonePlayer.startPlayingTone(frequency: frequency, duration: 8)
             print("end of GL - automatic , \(pitchCompareModel.isAutomatic) is Paused , \(pitchCompareModel.isPaused)")
             DispatchQueue.main.async {
                 self.pitchCompareModel.updateGeneratedFrequency(to: frequency, label: label, play: false)
             }
+       
             tonePlayer.stopPlaying()
             // Pause between pitches
               if pitchCompareModel.isAutomatic {

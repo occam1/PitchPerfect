@@ -4,22 +4,29 @@
 //
 //  Created by Mark Hall on 1/21/25.
 //
-
+import Combine
 import Accelerate
 import AVFoundation
 
 class FFTAnalyzer {
     static let shared = FFTAnalyzer()
     let pitchCompareModel = PitchCompareModel.shared
+
     // ✅ Singleton instance
 
 
     // ✅ Private init prevents external instantiation
-    private init() {}
+    private init() {
+    }
 
     private var fftSize: Int = 65536  // ✅ Default to max resolution for low frequencies
-    private let sampleRate: Float = 48000.0
+    private let sampleRate : Float = Float(PitchCompareModel.shared.detectedSampleRate)
 
+
+
+
+
+    
     func analyze(buffer: AVAudioPCMBuffer) -> Float? {
          guard let floatChannelData = buffer.floatChannelData else {
                 print("No channel data available in buffer.")
@@ -44,17 +51,24 @@ class FFTAnalyzer {
             let sampleCount = fftSize  // ✅ Explicitly set sampleCount
 
             let log2n = vDSP_Length(log2(Float(sampleCount)))
-            guard let fftSetup = vDSP_create_fftsetup(log2n, Int32(kFFTRadix2)) else {
-                print("Failed to create FFT setup")
-                return nil
-            }
+         // guard let fftSetup = vDSP_create_fftsetup(log2n, Int32(kFFTRadix2)) else {
+         //     print("Failed to create FFT setup")
+         //     return nil
+         // }
+        if vDSP_create_fftsetup(log2n, Int32(kFFTRadix2)) == nil {
+            print("Failed to create FFT setup")
+            return nil
+        }
         
         // Extract float channel data
-        guard let floatChannelData = buffer.floatChannelData else {
+       // guard let floatChannelData = buffer.floatChannelData else {
+       //     print("No channel data available in buffer.")
+       //     return nil
+       // }
+        if  buffer.floatChannelData == nil {
             print("No channel data available in buffer.")
             return nil
         }
-
 
         
         guard let fftSetup = vDSP_create_fftsetup(log2n, Int32(kFFTRadix2)) else {
@@ -115,6 +129,9 @@ class FFTAnalyzer {
                         magnitudes: magnitudes,
                         referenceFrequency: self.pitchCompareModel.generatedFrequency
                     )
+                    // ✅ Add this section for feedback:
+                      let pitchErrorCents = 1200 * log2(refinedFrequency / referenceFrequency)
+                      AudioFeedback.shared.playFeedbackTone(for: pitchErrorCents)
                     
                     // ✅ Update detected frequency
                     print("🎯 Refined dominantFrequency: \(refinedFrequency)")
