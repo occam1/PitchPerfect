@@ -8,7 +8,7 @@
 import AVFoundation
 
 class ToneGetter {
-    private let fftAnalyzer = FFTAnalyzer()
+    private let fftAnalyzer = FFTAnalyzer.shared
     private let pitchCompareModel = PitchCompareModel.shared
 
  

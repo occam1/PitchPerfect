@@ -9,20 +9,54 @@ import Accelerate
 import AVFoundation
 
 class FFTAnalyzer {
+    static let shared = FFTAnalyzer()
     let pitchCompareModel = PitchCompareModel.shared
+    // ✅ Singleton instance
+
+
+    // ✅ Private init prevents external instantiation
+    private init() {}
+
+    private var fftSize: Int = 65536  // ✅ Default to max resolution for low frequencies
+    private let sampleRate: Float = 48000.0
 
     func analyze(buffer: AVAudioPCMBuffer) -> Float? {
+         guard let floatChannelData = buffer.floatChannelData else {
+                print("No channel data available in buffer.")
+                return nil
+            }
+
+            // ✅ Select FFT size dynamically based on `generatedFrequency`
+            let generatedFrequency = pitchCompareModel.generatedFrequency
+
+            if generatedFrequency < 500 {
+                fftSize = 65536  // High resolution for low frequencies
+            } else if generatedFrequency < 1700 {
+                fftSize = 32768  // Medium resolution
+            } else {
+                fftSize = 16384  // Fast response for high frequencies
+            }
+         // ✅ Ensure sample count matches `fftSize`
+            var samples = [Float](repeating: 0.0, count: fftSize)
+            let frameLength = min(Int(buffer.frameLength), fftSize)  // Prevent buffer overflow
+            samples.replaceSubrange(0..<frameLength, with: UnsafeBufferPointer(start: floatChannelData[0], count: frameLength))
+
+            let sampleCount = fftSize  // ✅ Explicitly set sampleCount
+
+            let log2n = vDSP_Length(log2(Float(sampleCount)))
+            guard let fftSetup = vDSP_create_fftsetup(log2n, Int32(kFFTRadix2)) else {
+                print("Failed to create FFT setup")
+                return nil
+            }
+        
         // Extract float channel data
         guard let floatChannelData = buffer.floatChannelData else {
             print("No channel data available in buffer.")
             return nil
         }
 
-        let frameLength = Int(buffer.frameLength)
-        let samples = Array(UnsafeBufferPointer(start: floatChannelData[0], count: frameLength))
 
-        let sampleCount = samples.count
-        let log2n = vDSP_Length(log2(Float(sampleCount)))
+        
         guard let fftSetup = vDSP_create_fftsetup(log2n, Int32(kFFTRadix2)) else {
             print("Failed to create FFT setup")
             return nil
