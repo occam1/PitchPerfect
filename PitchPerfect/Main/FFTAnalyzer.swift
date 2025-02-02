@@ -106,18 +106,56 @@ class FFTAnalyzer {
                     }
                 }
 
-                // Find the dominant frequency
-                if let maxIndex = magnitudes.firstIndex(of: magnitudes.max() ?? 0) {
-                    dominantFrequency = Float(maxIndex) * frequencyResolution
-                    if let unwrappedFrequency = dominantFrequency {
-                        print("Filtered dominantFrequency: \(unwrappedFrequency)")
-                        self.pitchCompareModel.updateDetectedFrequency(unwrappedFrequency)
-                    }
+                // ✅ Find the peak index
+                if let peakIndex = magnitudes.firstIndex(of: magnitudes.max() ?? 0) {
+                    
+                    // ✅ Apply Parabolic Interpolation & Clamping
+                    let refinedFrequency = interpolateAndClampFrequency(
+                        peakIndex: peakIndex,
+                        magnitudes: magnitudes,
+                        referenceFrequency: self.pitchCompareModel.generatedFrequency
+                    )
+                    
+                    // ✅ Update detected frequency
+                    print("🎯 Refined dominantFrequency: \(refinedFrequency)")
+                    self.pitchCompareModel.updateDetectedFrequency(refinedFrequency)
+                    
+                    dominantFrequency = refinedFrequency
                 }
             }
         }
 
         vDSP_destroy_fftsetup(fftSetup)
         return dominantFrequency
+    }
+    
+    private func interpolateAndClampFrequency(peakIndex: Int, magnitudes: [Float], referenceFrequency: Float) -> Float {
+        if peakIndex <= 0 || peakIndex >= magnitudes.count - 1 { return referenceFrequency }
+
+        let alpha = magnitudes[peakIndex - 1]
+        let beta = magnitudes[peakIndex]
+        let gamma = magnitudes[peakIndex + 1]
+
+        // ✅ Parabolic interpolation formula
+        let binOffset = 0.5 * (alpha - gamma) / (alpha - 2 * beta + gamma)
+        let frequencyResolution = sampleRate / Float(fftSize)
+        let detectedFrequency = (Float(peakIndex) + binOffset) * frequencyResolution
+
+        // ✅ Compute threshold in Hz
+        let centsThreshold: Float = (referenceFrequency < 500) ? 15.0 : 5.0
+        let thresholdHz = referenceFrequency * (pow(2.0, centsThreshold / 1200.0) - 1.0)
+
+        print("🔍 Raw Detected Frequency: \(detectedFrequency) Hz")
+        print("🔹 Clamping Threshold: ±\(thresholdHz) Hz (±\(centsThreshold) cents)")
+        print("🔹 Reference Frequency: \(referenceFrequency) Hz")
+
+        // ✅ Clamp detected frequency if within threshold
+        if abs(detectedFrequency - referenceFrequency) <= thresholdHz {
+            print("✅ Clamping Applied → \(referenceFrequency) Hz")
+            return referenceFrequency  // 🔹 Lock it to expected frequency
+        } else {
+            print("🎯 Keeping Interpolated Frequency → \(detectedFrequency) Hz")
+            return detectedFrequency  // 🔹 Use refined detected frequency
+        }
     }
 }
