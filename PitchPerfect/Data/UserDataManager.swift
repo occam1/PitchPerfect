@@ -9,6 +9,11 @@
 import Foundation
 
 class UserDataManager {
+    static private(set) var users: [UserData] = []  // Collection of all users
+    static private(set) var currentUser: UserData?
+    
+
+    
     static func loadAllUsers() -> [UserData] {
         let directory = getDocumentsDirectory()
         
@@ -37,11 +42,22 @@ class UserDataManager {
         }
     }
 
-    static func loadUser(userName: String) -> UserData? {
-        // Load specific user by name
-        return nil // Placeholder for actual loading logic
-    }
+    /// Loads a user by name and sets them as the active user
+    static func loadUser(userName: String) {
+        guard let user = users.first(where: { $0.userName == userName }) else {
+            print("❌ User '\(userName)' not found")
+            return
+        }
 
+        currentUser = user  // ✅ Set as active user
+        
+        user.save()  // ✅ Persist the selection
+        UserDefaults.standard.set(userName, forKey: "lastUser")  // ✅ Save last chosen user
+
+        print("✅ Loaded user: \(userName)")
+    }
+    
+    
     static func saveUserData(_ user: UserData) {
         do {
             let encoder = JSONEncoder()

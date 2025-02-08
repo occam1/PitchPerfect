@@ -2,45 +2,50 @@
 //  ExerciseChromaticStep.swift
 //  PitchPerfect
 //
-//  Created by Mark Hall on 1/27/25.
+
 //
 class ExerciseChromaticStep: Exercise {
-    let name = "Chromatic Steps"
-    private var notes: [String] = [] // Full range of notes
-    private var currentIndex: Int = 0
-
-    init() {
-        notes = generateChromaticRange(from: "3C", to: "5D")
-        print("notes, \(AppDataManager.notes)")
-        print("mapped notes , \(notes)")
+    override var exerciseName : String {
+     return "Chromatic Step"
+ }
+ 
+    override init() {
+        super.init()
+        sortNotesByFrequency()  // ✅ Sort immediately upon initialization
     }
-    
-    func nextNote(currentNote: String?) -> String? {
+    //notes and fileterNoteFrequencies are defined in the base class
+    func nextNote(currentNote: String?) -> (String,Float)? {
         guard currentIndex < notes.count else { return nil }
         let next = notes[currentIndex]
         currentIndex += 1
         return next
     }
 
-    func reset() {
+    override func reset() {
         currentIndex = 0
     }
-
-    private func generateChromaticRange(from start: String, to end: String) -> [String] {
-        // Logic to generate chromatic notes from start to end
-        // Example: ["C3", "C#3", "D3", ... "D5"]
-        guard let startFrequency = AppDataManager.noteFrequencies[start],
-              let endFrequency = AppDataManager.noteFrequencies[end] else {
-            print("Invalid start or end note provided: \(start), \(end)")
-            return [] // Return an empty array if unwrapping fails
+    
+   override func nextNote() -> (note: String, frequency: Float)?{
+        if currentIndex >= notes.count {
+            reset()  // ✅ Reset if at the end
         }
-        let filteredNoteLabels = AppDataManager.noteFrequencies
-                .filter { _, frequency in
-                    frequency >= startFrequency && frequency <= endFrequency // Filter by frequency
-                }
-                .sorted { $0.value < $1.value } // Sort by frequency
-                .map { $0.key } // Extract the note labels
-            return filteredNoteLabels                                // Extract only the keys
-         
+        guard !notes.isEmpty else { return nil }  // ✅ Prevent out-of-bounds errors
+        
+        let next = notes[currentIndex]
+        currentIndex += incrementer
+        return next
+    }
+    
+    func sortNotesByFrequency() {
+        notes.sort { (a: (String, Float), b: (String, Float)) in
+            a.1 < b.1  // ✅ Sort by frequency (Float), which is the second element
+        }
+    }
+    override var description: String {
+        return """
+        This chromatic exercise steps thru an ordered collection of notes within the users range        
+        ascending thru the range then starting again from the lowest note in the users range steps 
+        through them again until or unless another exercise is selected
+        """
     }
 }

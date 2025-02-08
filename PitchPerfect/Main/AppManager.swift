@@ -115,7 +115,7 @@ class AppManager: ObservableObject {
     
     private func runGameLoop() {
         let exerciseManager = ExerciseManager.shared
-        var currentNote: String?
+        var currentNote: (String,Float)
         if PitchPerfectApp.doDebug {
             print("AM rGL isRunning ,\(isRunning)")
         }
@@ -135,24 +135,21 @@ class AppManager: ObservableObject {
                 if !isRunning { break } // Exit if the game is stopped while paused
            // }
             // Get the next note from the current exercise
-             guard let nextNote = exerciseManager.currentExercise().nextNote(currentNote: currentNote) else {
+             guard let nextNote = exerciseManager.currentExercise().nextNote() else {
                  exerciseManager.selectNextExercise()
                  exerciseManager.resetCurrentExercise()
                  continue
              }
 
-             currentNote = nextNote
           
             // Get the frequency for the current label
-            guard let frequency = AppDataManager.noteFrequencies[nextNote] else {
-                print("Frequency not found for label: \(nextNote)")
-                continue // Skip the current iteration if frequency is nil
-            }
-            let label = utility.convertToNoteOctave(from: nextNote)
+  
+            let label =  nextNote.0
+            let frequency = nextNote.1
+        
             // Update the PitchCompareModel with the generated frequency and label
             DispatchQueue.main.async {
                 self.pitchCompareModel.updateGeneratedFrequency(to: frequency, label: label, play: true)
-
             }
 
             // Play the tone
