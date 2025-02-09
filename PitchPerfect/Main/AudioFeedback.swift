@@ -14,6 +14,10 @@ class AudioFeedback {
     var sampleRate: Double = 0.0
 
     private init() {
+        print("🎵 AudioFeedback initialized")
+        print("🎵 AudioFeedback initialized")
+        print("🎵 AudioFeedback initialized")
+        print("🎵 AudioFeedback initialized")
         setupAudioEngine()
         sampleRate =  pitchCompareModel.detectedSampleRate
     }

@@ -15,7 +15,7 @@ class AudioSessionManager {
     private(set) var isRecording = false
     private(set) var statusMessage = "Microphone access not requested yet."
     let audioSession = AVAudioSession.sharedInstance()
-    let volumeThreshold: Float = 0.0000009 // Adjust this value based on your requirements
+    let volumeThreshold: Float = 0.0009 // Adjust this value based on your requirements
 
     // Computed property for available inputs
     var availableInputs: [AVAudioSessionPortDescription]? {
@@ -155,7 +155,7 @@ class AudioSessionManager {
         let audioBuffer = buffer.audioBufferList.pointee.mBuffers
         let audioData = audioBuffer.mData?.assumingMemoryBound(to: Float.self)
         let audioDataArray = UnsafeMutableBufferPointer(start: audioData, count: Int(buffer.frameLength))
-
+        print("📦 processAudio received buffer: \(Unmanaged.passUnretained(buffer).toOpaque()) | FrameLength: \(buffer.frameLength)")
         // Apply threshold filtering
         let rms = sqrt(audioDataArray.reduce(0) { $0 + $1 * $1 } / Float(audioDataArray.count))
         
