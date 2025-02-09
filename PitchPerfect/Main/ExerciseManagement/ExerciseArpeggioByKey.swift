@@ -7,7 +7,8 @@ class ExerciseArpeggioByKey: Exercise {
 
     override init() {
         super.init()  // ✅ Call base class initializer
-
+        Exercise.registerExercise(name: "ExerciseArpeggioByKey", instance: self)
+   
         // ✅ Generate arpeggio note list based on user's range
         self.notes = generateNoteList()
     }

@@ -15,6 +15,7 @@ class AppManager: ObservableObject {
     private let pitchCompareModel = PitchCompareModel.shared
     private lazy var toneGetter = ToneGetter()
     private var isRunning = false
+    let exerciseChromaticStep = ExerciseChromaticStep.shared
     @Published var showUserSelection = false  // ✅ Controls the selection screen
 
 
@@ -135,12 +136,17 @@ class AppManager: ObservableObject {
                 if !isRunning { break } // Exit if the game is stopped while paused
            // }
             // Get the next note from the current exercise
-             guard let nextNote = exerciseManager.currentExercise().nextNote() else {
-                 exerciseManager.selectNextExercise()
-                 exerciseManager.resetCurrentExercise()
-                 continue
-             }
-
+             //guard let nextNote = exerciseManager.currentExercise().nextNote() else {
+             //    exerciseManager.selectNextExercise()
+             //    exerciseManager.resetCurrentExercise()
+             //    continue
+             //}
+            exerciseChromaticStep.startExercise()
+            guard let nextNote = exerciseChromaticStep.nextNote()
+            else {print( "No more notes in exercise")
+                return}
+    
+             currentNote = nextNote
           
             // Get the frequency for the current label
   

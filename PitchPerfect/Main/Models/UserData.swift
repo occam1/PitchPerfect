@@ -12,21 +12,28 @@ class UserData: Codable, ObservableObject {
 
     @Published var userName: String
     @Published var advancedSettings: AdvancedSettings
+    @Published var selectedExercises: [String] // ✅ Tracks user's selected exercises
+    @Published var exerciseSettings: [String: Int] // ✅ Stores turnDuration per exercise
+
     var lowestFrequency: Float = 0.0
     var highestFrequency: Float = 0.0
 
-
-    private init(userName: String, advancedSettings: AdvancedSettings) {
+    private init(userName: String, advancedSettings: AdvancedSettings, selectedExercises: [String]) {
         self.userName = userName
         self.advancedSettings = advancedSettings
+        self.selectedExercises = ["ExerciseChromaticStep"] // ✅ Default exercise on creation
+        self.exerciseSettings = [:] // ✅ Empty dictionary, will be populated dynamically
         populateFrequencies()  // ✅ Automatically set frequencies when UserData is initialized
     }
+
     // ✅ Coding Keys for manual encoding/decoding
     enum CodingKeys: String, CodingKey {
         case userName
         case advancedSettings
         case lowestFrequency
         case highestFrequency
+        case selectedExercises // ✅ Add selectedExercises to persisted data
+        case exerciseSettings
     }
 
     // ✅ Custom Decoder
@@ -36,7 +43,12 @@ class UserData: Codable, ObservableObject {
         self.advancedSettings = try container.decode(AdvancedSettings.self, forKey: .advancedSettings)
         self.lowestFrequency = try container.decodeIfPresent(Float.self, forKey: .lowestFrequency) ?? 0.0
         self.highestFrequency = try container.decodeIfPresent(Float.self, forKey: .highestFrequency) ?? 0.0
-}
+        self.selectedExercises = try container.decodeIfPresent([String].self, forKey: .selectedExercises) ?? ["ExerciseChromaticStep"]
+        self.exerciseSettings = try container.decodeIfPresent([String: Int].self, forKey: .exerciseSettings) ?? [:]
+
+        print("decoding selectedExercises: \(self.selectedExercises)")
+        
+    }
 
     // ✅ Custom Encoder
     func encode(to encoder: Encoder) throws {
@@ -45,22 +57,27 @@ class UserData: Codable, ObservableObject {
         try container.encode(advancedSettings, forKey: .advancedSettings)
         try container.encode(lowestFrequency, forKey: .lowestFrequency)
         try container.encode(highestFrequency, forKey: .highestFrequency)
+        print("encoding selectedExercises: \(selectedExercises)")
+        try container.encode(selectedExercises, forKey: .selectedExercises) // ✅ Persist selected exercises        
+        try container.encode(exerciseSettings, forKey: .exerciseSettings)
     }
+
     /// ✅ Automatically sets lowest & highest frequencies when user data is loaded
     func populateFrequencies() {
         lowestFrequency = AppDataManager.noteFrequencies[advancedSettings.lowestNote] ?? 0.0
         highestFrequency = AppDataManager.noteFrequencies[advancedSettings.highestNote] ?? 0.0
     }
+
     // ✅ Call this when the user selects an account
     static func setActiveUser(user: UserData) {
         shared = user
-        shared?.populateFrequencies() // ✅ Ensure frequencies are up-to-date
-        user.save() // Persist user selection
+        shared?.populateFrequencies()
+        user.save()
     }
 
     // ✅ Load user by username (if it exists)
     static func loadUser(userName: String) {
-         UserDataManager.loadUser(userName: userName)
+        UserDataManager.loadUser(userName: userName)
         return
     }
 
@@ -73,13 +90,12 @@ class UserData: Codable, ObservableObject {
                 midBridge: "",
                 highestNote: "",
                 selectedKey: "C"
-            )
+            ),
+            selectedExercises: ["ExerciseChromaticStep"] // ✅ Default to only Chromatic Step
         )
         shared = newUser
-        shared?.populateFrequencies() // ✅ Set frequencies
-        newUser.save() // ✅ Save the new user
-        print("📂 Saving user at: \(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!)")
-        
+        shared?.populateFrequencies()
+        newUser.save()
     }
 
     // ✅ Save user and store last used username
@@ -88,5 +104,13 @@ class UserData: Codable, ObservableObject {
         UserDefaults.standard.set(self.userName, forKey: "lastUser")
     }
     
-
+    // ✅ Toggle an exercise selection
+    func toggleExerciseSelection(exerciseName: String) {
+        if selectedExercises.contains(exerciseName) {
+            selectedExercises.removeAll { $0 == exerciseName }
+        } else {
+            selectedExercises.append(exerciseName)
+        }
+        save() // ✅ Persist changes immediately
+    }
 }

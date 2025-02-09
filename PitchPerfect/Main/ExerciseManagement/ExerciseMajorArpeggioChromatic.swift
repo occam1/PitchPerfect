@@ -13,6 +13,7 @@ class ExerciseMajorArpeggioChromatic: Exercise {
 
     override init() {
         super.init()
+        Exercise.registerExercise(name: "ExerciseMajorArpeggioChromatic", instance: self)
         generateArpeggioSequence()
     }
 
@@ -25,8 +26,11 @@ class ExerciseMajorArpeggioChromatic: Exercise {
             for (note, frequency) in (ascending ? notes : notes.reversed()) {
                 if let majorThird = getInterval(note: note, semitones: 4),
                    let perfectFifth = getInterval(note: note, semitones: 7) {
+                    guard let user = UserData.shared else {
+                        fatalError("❌ UserData.shared is not initialized. A user must be set before creating an Exercise.")
+                    }
                     
-                    if perfectFifth.1 > userData.highestFrequency {
+                    if perfectFifth.1 > user.highestFrequency {
                         ascending = false  // ✅ Reverse direction if the 5th is out of range
                     }
 

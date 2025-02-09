@@ -5,13 +5,15 @@
 
 //
 class ExerciseChromaticStep: Exercise {
+    static let shared = ExerciseChromaticStep()
     override var exerciseName : String {
      return "Chromatic Step"
  }
  
     override init() {
         super.init()
-        sortNotesByFrequency()  // ✅ Sort immediately upon initialization
+        Exercise.registerExercise(name: "ExerciseChromaticStep", instance: self)
+     
     }
     //notes and fileterNoteFrequencies are defined in the base class
     func nextNote(currentNote: String?) -> (String,Float)? {
@@ -24,7 +26,10 @@ class ExerciseChromaticStep: Exercise {
     override func reset() {
         currentIndex = 0
     }
-    
+    override func getUsersRange() {
+        super.getUsersRange()  // ✅ Get user's range from base class
+        sortNotesByFrequency() // ✅ Ensure notes are sorted
+    }
    override func nextNote() -> (note: String, frequency: Float)?{
         if currentIndex >= notes.count {
             reset()  // ✅ Reset if at the end

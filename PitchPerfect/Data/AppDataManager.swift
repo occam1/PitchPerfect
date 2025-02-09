@@ -14,15 +14,16 @@ class AppDataManager {
     public static var enharmonics: [String: String] = [:]
     public static var keyNotes: [String: [String]] = [:]
     public static var noteFrequencies: [String: Float] = [:]
+    public static var exercises: [String:Bool] = [:]
     
     // Static initializer to load data
     //static func initialize() {
-        //self.keys = loadKeysFromJSON()
-        // self.loadKeyNotesFromJSON()
-        //self.loadEnharmonicsFromJSON()
-        //self.loadNoteFrequenciesFromJSON()
+    //self.keys = loadKeysFromJSON()
+    // self.loadKeyNotesFromJSON()
+    //self.loadEnharmonicsFromJSON()
+    //self.loadNoteFrequenciesFromJSON()
     //}
-
+    
     
     // Static function to access keys with their notes
     static func getKeyNotes() -> [String: [String]] {
@@ -30,20 +31,20 @@ class AppDataManager {
     }
     
     // Private static function to load just the keys
-   public static func loadNotesFromJSON() {
+    public static func loadNotesFromJSON() {
         // Get the URL for the JSON file in the bundle
         guard let fileURL = Bundle.main.url(forResource: "notes", withExtension: "json") else {
             print("notes.json not found in bundle.")
             return
         }
-
+        
         do {
             // Load the data from the file
             let data = try Data(contentsOf: fileURL)
-
+            
             // Decode the JSON data into an array of strings
-             notes = try JSONDecoder().decode([String].self, from: data)
-          
+            notes = try JSONDecoder().decode([String].self, from: data)
+            
         } catch {
             print("Error loading or decoding notes.json: \(error)")
             return
@@ -54,7 +55,7 @@ class AppDataManager {
     
     static func loadKeyNotesFromJSON()   {
         guard let url = Bundle.main.url(forResource: "keyNotes", withExtension: "json") else {
-                print("KeyNotes.json not found.")
+            print("KeyNotes.json not found.")
             return
         }
         
@@ -113,9 +114,32 @@ class AppDataManager {
             print("Error loading noteFrequencies.json: \(error)")
         }
     }
-}
     
-
+    
+    
+    static func loadExercisesFromJSON() {
+           // if PitchPerfectApp.doDebug {
+                print("starting to load Exercises")
+            //}
+            guard let fileURL = Bundle.main.url(forResource: "exercises", withExtension: "json") else {
+                print("exercises.json not found in bundle.")
+                return
+            }
+            
+            do {
+                
+                let data = try Data(contentsOf: fileURL)
+                exercises = try JSONDecoder().decode([String: Bool].self, from: data)
+                
+               // if PitchPerfectApp.doDebug {
+                    print("Loaded \(exercises.count) exercises. ,\(exercises)")
+               // }
+            } catch {
+                print("Error loading exercises.json: \(error)")
+            }
+        }
+        
+}
 
 // Private static function to load keys with their corresponding notes
 struct KeyNotesData: Decodable {
@@ -130,3 +154,4 @@ struct Enharmonics: Decodable {
     let noteName: String
     let enharmonicName: String
 }
+

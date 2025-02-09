@@ -12,6 +12,7 @@ init() {
         AppDataManager.loadKeyNotesFromJSON()
         AppDataManager.loadEnharmonicsFromJSON()
         AppDataManager.loadNoteFrequenciesFromJSON()
+        AppDataManager.loadExercisesFromJSON()
         print("Initialization complete.")
     }
     var body: some Scene {
