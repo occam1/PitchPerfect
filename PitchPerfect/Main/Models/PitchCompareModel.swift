@@ -66,7 +66,7 @@ class PitchCompareModel: ObservableObject {
         // Perform some task
       
         
-        print("Elapsed time: \(elapsedTime) seconds")
+      //  print("Elapsed time: \(elapsedTime) seconds")
         if diff < tolerance {
           //let elapsedTime = Date().timeIntervalSince(startTime)
           //if elapsedTime > 0.5 {

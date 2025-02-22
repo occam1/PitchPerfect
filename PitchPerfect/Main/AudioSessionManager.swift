@@ -15,7 +15,7 @@ class AudioSessionManager {
     private(set) var isRecording = false
     private(set) var statusMessage = "Microphone access not requested yet."
     let audioSession = AVAudioSession.sharedInstance()
-    let volumeThreshold: Float = 0.0009 // Adjust this value based on your requirements
+    let volumeThreshold: Float = 0.0000009 // Adjust this value based on your requirements
 
     // Computed property for available inputs
     var availableInputs: [AVAudioSessionPortDescription]? {
@@ -80,7 +80,7 @@ class AudioSessionManager {
         eqBand.filterType = .bandPass
         eqBand.frequency = 1030.0   // Center frequency (Hz)
         eqBand.bandwidth = 3.32    // Bandwidth in octaves (~60 Hz to 2000 Hz)
-        eqBand.gain = 10.0         // Gain in dB
+        eqBand.gain = 4.0         // Gain in dB
         eqBand.bypass = false
     }
 
@@ -89,7 +89,8 @@ class AudioSessionManager {
 
         do {
             // Configure audio session
-            try session.setCategory(.playAndRecord, mode: .default, options: [.allowBluetooth, .allowBluetoothA2DP])
+            try session.setCategory(.playAndRecord, mode: .measurement, options: [.allowBluetooth, .allowBluetoothA2DP])
+            //try session.setMode(.videoRecording)
             try session.setActive(true)
 
             // Attach nodes
@@ -155,7 +156,6 @@ class AudioSessionManager {
         let audioBuffer = buffer.audioBufferList.pointee.mBuffers
         let audioData = audioBuffer.mData?.assumingMemoryBound(to: Float.self)
         let audioDataArray = UnsafeMutableBufferPointer(start: audioData, count: Int(buffer.frameLength))
-        print("📦 processAudio received buffer: \(Unmanaged.passUnretained(buffer).toOpaque()) | FrameLength: \(buffer.frameLength)")
         // Apply threshold filtering
         let rms = sqrt(audioDataArray.reduce(0) { $0 + $1 * $1 } / Float(audioDataArray.count))
         

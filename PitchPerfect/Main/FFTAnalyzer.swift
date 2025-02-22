@@ -53,7 +53,31 @@ class FFTAnalyzer {
         var samples = [Float](repeating: 0.0, count: fftSize)
         let frameLength = min(Int(buffer.frameLength), fftSize)
         samples.replaceSubrange(0..<frameLength, with: UnsafeBufferPointer(start: floatChannelData[0], count: frameLength))
+/////////////////////////////////////////////////
+        var rawEnergy: Float = 0.0
+        vDSP_svesq(samples, 1, &rawEnergy, vDSP_Length(samples.count))
 
+        print("🔋 Raw Energy: \(rawEnergy)")
+        // ✅ Compute total energy of the input signal
+        var totalEnergy: Float = 0.0
+        vDSP_svesq(samples, 1, &totalEnergy, vDSP_Length(samples.count))
+
+        // ✅ Apply Exponential Moving Average (EMA) to prevent over-smoothing
+          var smoothedEnergy: Float = 0.0
+        let alpha: Float = 0.3 // Weight for new values (adjust between 0.1 and 0.3 for best results)
+
+        smoothedEnergy = alpha * totalEnergy + (1 - alpha) * smoothedEnergy
+
+        // ✅ Use a threshold that adapts to the energy
+        let silenceThreshold: Float = max(1e-12, smoothedEnergy * 0.5) // Dynamic, but prevents decay
+
+        if smoothedEnergy < silenceThreshold {
+            print("🔇 No significant input detected (smoothed energy: \(smoothedEnergy)). Skipping frequency analysis.")
+            return nil
+        }
+
+        print("🎤 Detected sound with smoothed energy: \(smoothedEnergy)")
+//////////////////////////////////////////
         let sampleCount = fftSize
         var window = [Float](repeating: 0.0, count: sampleCount)
         vDSP_hann_window(&window, vDSP_Length(sampleCount), Int32(vDSP_HANN_NORM))
@@ -89,7 +113,23 @@ class FFTAnalyzer {
                     }
                 }
 
+                // ✅ Check if there is any significant peak in the magnitudes
+                let maxMagnitude = magnitudes.max() ?? 0.0
+                let peakThreshold: Float = 1e-5 // Adjust based on noise levels
+
+                if maxMagnitude < peakThreshold {
+                    print("🔇 No significant frequency peak detected. Skipping interpolation.")
+                    return
+                }
+                //---------------------
                 if let peakIndex = magnitudes.firstIndex(of: magnitudes.max() ?? 0) {
+                    let frequencyResolution = sampleRate / Float(fftSize)
+                    let rawDetectedFrequency = Float(peakIndex) * frequencyResolution
+
+                    print("🔍 Raw Detected Frequency BEFORE any filtering: \(rawDetectedFrequency) Hz")
+                }
+      //-----------------------
+                if let peakIndex = magnitudes.firstIndex(of: maxMagnitude) {
                     let refinedFrequency = interpolateAndClampFrequency(
                         peakIndex: peakIndex,
                         magnitudes: magnitudes,
@@ -104,7 +144,6 @@ class FFTAnalyzer {
                     DispatchQueue.main.async {
                         AudioFeedback.shared.playFeedbackTone(for: pitchErrorCents)
                     }
-                    print("🔊 Playing feedback tone for pitch error: \(pitchErrorCents) cents")
 
                     dominantFrequency = refinedFrequency
                 }
@@ -113,7 +152,6 @@ class FFTAnalyzer {
 
         return dominantFrequency
     }
-
     deinit {
         if let fftSetup = fftSetup {
             vDSP_destroy_fftsetup(fftSetup)

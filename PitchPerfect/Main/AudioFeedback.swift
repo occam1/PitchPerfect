@@ -14,10 +14,6 @@ class AudioFeedback {
     var sampleRate: Double = 0.0
 
     private init() {
-        print("🎵 AudioFeedback initialized")
-        print("🎵 AudioFeedback initialized")
-        print("🎵 AudioFeedback initialized")
-        print("🎵 AudioFeedback initialized")
         setupAudioEngine()
         sampleRate =  pitchCompareModel.detectedSampleRate
     }
@@ -41,7 +37,6 @@ class AudioFeedback {
     func playFeedbackTone(for error: Float) {
         guard abs(error) > 5.0 else { return } // Ignore very small deviations
        
-        print("Player Output Format: \(playerNode.outputFormat(forBus: 0))")
         let baseFreq: Float = 400.0  // Neutral reference tone
         let feedbackFreq = baseFreq * pow(2.0, error / 1200.0) // Adjust by cents
 
@@ -55,8 +50,6 @@ class AudioFeedback {
         let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount)!
         buffer.frameLength = frameCount
-        print("Buffer Format: \(buffer.format)")
-        print("Buffer frameLength: \(buffer.frameLength)")
         let audioBuffer = buffer.floatChannelData![0]
 
         for i in 0..<Int(frameCount) {
