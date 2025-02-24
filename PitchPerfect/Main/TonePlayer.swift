@@ -29,9 +29,9 @@ class TonePlayer {
         let bufferDuration = min(duration, 2.0) // Generate up to 2 seconds at a time
         let buffer = generateToneBuffer(frequency: frequency, duration: bufferDuration)
 
-        if PitchPerfectApp.doDebug {
+        //if PitchPerfectApp.doDebug {
             print("Started playing tone for \(duration) seconds.")
-        }
+        //}
 
         // Attach and connect the playerNode
         audioEngine.attach(playerNode)

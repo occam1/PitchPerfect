@@ -15,6 +15,8 @@ class AppManager: ObservableObject {
     private let pitchCompareModel = PitchCompareModel.shared
     private lazy var toneGetter = ToneGetter()
     private var isRunning = false
+    private let exerciseManager = ExerciseManager.shared
+    private var exerciseTurnDuration: TimeInterval = 10
     //let exerciseChromaticStep = ExerciseChromaticStep.shared
     //let exerciseArpeggiosByKey = ExerciseArpeggiosByKey.shared
     @Published var showUserSelection = false  // ✅ Controls the selection screen
@@ -37,7 +39,7 @@ class AppManager: ObservableObject {
             UserData.setActiveUser(user: users.first!)
             showUserSelection = false
             if let activeUser = UserData.shared {
-                ExerciseManager.shared.loadUserExercises(for: activeUser) // ✅ Unwrapped safely
+                exerciseManager.loadUserExercises(for: activeUser) // ✅ Unwrapped safely
             }
         } else {
             // ✅ Multiple users → Require explicit selection
@@ -95,7 +97,7 @@ class AppManager: ObservableObject {
     func startProcesses() {
         if !isRunning {
             if let activeUser = UserData.shared {
-                ExerciseManager.shared.loadUserExercises(for: activeUser) // ✅ Unwrapped safely
+                exerciseManager.loadUserExercises(for: activeUser) // ✅ Unwrapped safely
             }
 
                 Task {
@@ -122,13 +124,19 @@ class AppManager: ObservableObject {
     }
     
     private func runGameLoop() {
-        let exerciseManager = ExerciseManager.shared
       //  var currentNote: (String,Float)
         if PitchPerfectApp.doDebug {
             print("AM rGL isRunning ,\(isRunning)")
         }
-
-
+         guard let exercise = exerciseManager.currentExercise() else {
+             print("No exercise selected")
+             return
+         }
+         print("starting exercise , \(exercise.exerciseName)")
+         exercise.startExercise()
+         exercise.loadTurnDuration()
+        exerciseTurnDuration =    exercise.getDuration()
+        print("starting rGL - for duration of \(exerciseTurnDuration)")
         while isRunning {
             print("Starting rGL loop")
             print("automatic , \(pitchCompareModel.isAutomatic) or paused , \(pitchCompareModel.isPaused)")
@@ -142,19 +150,19 @@ class AppManager: ObservableObject {
                 }
                 if !isRunning { break } // Exit if the game is stopped while paused
             
-            guard let exercise = ExerciseManager.shared.currentExercise() else {
-                print("No exercise selected")
-                return
-            }
-            print("starting exercise , \(exercise.exerciseName)")
+           // guard let exercise = exerciseManager.currentExercise() else {
+            //    print("No exercise selected")
+            //    return
+           // }
+           // print("starting exercise , \(exercise.exerciseName)")
             
-            exercise.startExercise()
+            //exercise.startExercise()
            
             let (nextNote, isLast) = exercise.nextNote() // Destructure the tuple
 
             guard let validNote = nextNote else {
                 print("No more notes in current exercise, selecting next")
-                ExerciseManager.shared.selectNextExercise()
+                exerciseManager.selectNextExercise()
                 runGameLoop() // Restart with new exercise
                 return
             }
@@ -172,18 +180,35 @@ class AppManager: ObservableObject {
             DispatchQueue.main.async {
                 self.pitchCompareModel.updateGeneratedFrequency(to: frequency, label: label, play: true)
             }
-
+            exerciseTurnDuration =    exercise.getDuration()
             // Play the tone
             print("Running game loop, playing tone refFreq,\(frequency) ")
+            print("for duration of \(exerciseTurnDuration)")
             
-            
-            tonePlayer.startPlayingTone(frequency: frequency, duration: 8)
+            tonePlayer
+                .startPlayingTone(
+                    frequency: frequency,
+                    duration: exerciseTurnDuration
+                )
             print("end of GL - automatic , \(pitchCompareModel.isAutomatic) is Paused , \(pitchCompareModel.isPaused)")
             DispatchQueue.main.async {
                 self.pitchCompareModel.updateGeneratedFrequency(to: frequency, label: label, play: false)
             }
        
             tonePlayer.stopPlaying()
+            
+            if isLast {
+                exerciseManager.selectNextExercise()
+                guard let exercise = exerciseManager.currentExercise() else {
+                    print("No exercise selected")
+                    return
+                }
+                print("starting exercise , \(exercise.exerciseName)")
+                exercise.startExercise()
+                exercise.loadTurnDuration()
+                exerciseTurnDuration =    exercise.getDuration()
+                print("isLast - for duration of \(exerciseTurnDuration)")
+            }
             // Pause between pitches
               if pitchCompareModel.isAutomatic {
                   print("Pausing for user to catch their breath")

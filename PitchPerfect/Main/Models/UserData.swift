@@ -13,7 +13,7 @@ class UserData: Codable, ObservableObject {
     @Published var userName: String
     @Published var advancedSettings: AdvancedSettings
     @Published var selectedExercises: [String] // ✅ Tracks user's selected exercises
-    @Published var exerciseSettings: [String: Int] // ✅ Stores turnDuration per exercise
+    @Published var turnDurations: [String: Int] // ✅ Stores turnDuration per exercise
 
     var lowestFrequency: Float = 0.0
     var highestFrequency: Float = 0.0
@@ -22,7 +22,7 @@ class UserData: Codable, ObservableObject {
         self.userName = userName
         self.advancedSettings = advancedSettings
         self.selectedExercises = ["ExerciseArpeggiosByKey"] // ✅ Default exercise on creation
-        self.exerciseSettings = [:] // ✅ Empty dictionary, will be populated dynamically
+        self.turnDurations = [:] // ✅ Empty dictionary, will be populated dynamically
         populateFrequencies()  // ✅ Automatically set frequencies when UserData is initialized
     }
 
@@ -33,7 +33,7 @@ class UserData: Codable, ObservableObject {
         case lowestFrequency
         case highestFrequency
         case selectedExercises // ✅ Add selectedExercises to persisted data
-        case exerciseSettings
+        case turnDurations
     }
 
     // ✅ Custom Decoder
@@ -44,7 +44,7 @@ class UserData: Codable, ObservableObject {
         self.lowestFrequency = try container.decodeIfPresent(Float.self, forKey: .lowestFrequency) ?? 0.0
         self.highestFrequency = try container.decodeIfPresent(Float.self, forKey: .highestFrequency) ?? 0.0
         self.selectedExercises = try container.decodeIfPresent([String].self, forKey: .selectedExercises) ?? ["ExerciseArpeggiosByKey"]
-        self.exerciseSettings = try container.decodeIfPresent([String: Int].self, forKey: .exerciseSettings) ?? [:]
+        self.turnDurations = try container.decodeIfPresent([String: Int].self, forKey: .turnDurations) ?? [:]
 
         print("decoding selectedExercises: \(self.selectedExercises)")
         
@@ -59,7 +59,7 @@ class UserData: Codable, ObservableObject {
         try container.encode(highestFrequency, forKey: .highestFrequency)
         print("encoding selectedExercises: \(selectedExercises)")
         try container.encode(selectedExercises, forKey: .selectedExercises) // ✅ Persist selected exercises        
-        try container.encode(exerciseSettings, forKey: .exerciseSettings)
+        try container.encode(turnDurations, forKey: .turnDurations)
     }
 
     /// ✅ Automatically sets lowest & highest frequencies when user data is loaded

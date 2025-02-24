@@ -4,7 +4,9 @@ class ExerciseArpeggiosByKey: Exercise {
         return "Arpeggio By Key"
     }
     private var noteIndex: Int = 0
-
+    override init() {
+        super.init()
+    }
     override func getUsersRange() {
         super.getUsersRange()  // ✅ Get user's range from base class
         sortNotesByFrequency() // ✅ Ensure notes are sorted
@@ -29,12 +31,13 @@ class ExerciseArpeggiosByKey: Exercise {
     func generateArpeggioNotes() {
         arpeggioNotes.removeAll() // Start fresh
 
-        for key in AppDataManager.keyNotes.keys {
+        for key in AppDataManager.circleOfFifths {
+            let lookupKey = AppDataManager.enharmonics[key] ?? key
             guard let keyNotes = AppDataManager.keyNotes[key], keyNotes.count >= 5 else {
-                print("Invalid key data for \(key)")
+                print("Invalid key data for \(key)  \(lookupKey)")
                 continue
             }
-
+           //print("key and keyNotes[0]: \(key), \(keyNotes[0]) ")
             // Store original note names (could be flats)
             let originalRoot = keyNotes[0]
             let originalThird = keyNotes[2]
@@ -44,7 +47,7 @@ class ExerciseArpeggiosByKey: Exercise {
             let rootLookup = AppDataManager.enharmonics[originalRoot] ?? originalRoot
             let thirdLookup = AppDataManager.enharmonics[originalThird] ?? originalThird
             let fifthLookup = AppDataManager.enharmonics[originalFifth] ?? originalFifth
-
+            //print("rootLookup and fifthLookup: \(rootLookup), \(fifthLookup) ")
             // Find first and last occurrence of root and fifth
             guard let firstIndex = exerciseNoteFrequencies.firstIndex(where: { $0.0.dropLast(1) == rootLookup }),
                   let lastIndex = exerciseNoteFrequencies.lastIndex(where: { $0.0.dropLast(1) == fifthLookup }),
@@ -78,9 +81,10 @@ class ExerciseArpeggiosByKey: Exercise {
                        }
             }
         }
+        //print("arpeggioNotes: \(arpeggioNotes)")
     }
     override func nextNote() -> ((note: String, frequency: Float)?, isLast:Bool)  {
-        currentIndex  = currentIndex + 1
+        
         if currentIndex >= arpeggioNotes.count {
             currentIndex = 0
         }
@@ -91,7 +95,8 @@ class ExerciseArpeggiosByKey: Exercise {
        //    return (emptyNote, false) }  // ✅ Prevents out-of-bounds errors
         
         let next = arpeggioNotes[currentIndex]
-        let isLast = (currentIndex == arpeggioNotes.count - 1) // Defaults to false until the last note
+        currentIndex  = currentIndex + 1
+        let isLast = (currentIndex == arpeggioNotes.count) // Defaults to false until the last note
 
         return (next, isLast)
     }

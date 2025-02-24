@@ -53,11 +53,12 @@ class ExerciseManager {
     }
 
     func currentExercise() -> Exercise? {
-        print("em current exercises: \(selectedExercises)")
-        print("em current exercise: \(selectedExercises[currentExerciseIndex])")
-        print("em exerciseInstances: \(exerciseInstances.keys)")
         guard !selectedExercises.isEmpty else { return nil }
-        return exerciseInstances[selectedExercises[currentExerciseIndex]]
+        
+        let exercise = exerciseInstances[selectedExercises[currentExerciseIndex]]
+        exercise?.reset() // ✅ Reset before returning to ensure it's always ready
+        
+        return exercise
     }
 
     func resetCurrentExercise() {

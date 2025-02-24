@@ -11,6 +11,7 @@ class AppDataManager {
     // Static properties to hold data
     public static let shared = AppDataManager()
     public static var notes: [String] = []
+    public static var circleOfFifths: [String] = []
     public static var enharmonics: [String: String] = [:]
     public static var keyNotes: [String: [String]] = [:]
     public static var noteFrequencies: [String: Float] = [:]
@@ -43,14 +44,33 @@ class AppDataManager {
             let data = try Data(contentsOf: fileURL)
             
             // Decode the JSON data into an array of strings
-            notes = try JSONDecoder().decode([String].self, from: data)
-            
+            let notesDecoded = try JSONDecoder().decode([String].self, from: data)
+            self.notes = notesDecoded
         } catch {
             print("Error loading or decoding notes.json: \(error)")
             return
         }
     }
-    
+    // Private static function to load just the keys
+    public static func loadCircleOfFifthsFromJSON() {
+        // Get the URL for the JSON file in the bundle
+        guard let fileURL = Bundle.main.url(forResource: "circleOfFifths", withExtension: "json") else {
+            print("circleOfFifths.json not found in bundle.")
+            return
+        }
+        
+        do {
+            // Load the data from the file
+            let data = try Data(contentsOf: fileURL)
+            
+            // Decode the JSON data into an array of strings
+           let circleOfFifthsDecoded = try JSONDecoder().decode([String].self, from: data)
+            self.circleOfFifths = circleOfFifthsDecoded
+        } catch {
+            print("Error loading or decoding circleOfFifths.json: \(error)")
+            return
+        }
+    }
     
     
     static func loadKeyNotesFromJSON()   {

@@ -4,6 +4,7 @@
 //
 //  Created by Mark Hall on 2/8/25.
 //
+import Foundation
 class Exercise {
     static var registeredExercises: [String: Exercise] = [:] // ✅ Stores all exercise instances
     
@@ -14,11 +15,15 @@ class Exercise {
     
     internal var currentIndex: Int = 0
     internal var incrementer: Int = 1
+    var turnDuration: Int?  // Default value
 
     /// ✅ Name of the exercise (must be overridden)
     var exerciseName: String {
         fatalError("Subclasses must override `exerciseName`.")
     }
+
+
+
 
     /// ✅ Determines if the exercise involves gliding tones
     var isGlidingTone: Bool {
@@ -39,6 +44,7 @@ class Exercise {
     init() {
         let exerciseClass = String(describing: type(of: self)) // ✅ Always returns a valid string
         Exercise.registerExercise(name: exerciseClass, instance: self)
+ 
         
     }
 
@@ -47,7 +53,23 @@ class Exercise {
         print("🚀 Starting base exercise...")
         getUsersRange() // ✅ Load user's range on start
     }
+     func loadTurnDuration() {
+        guard let user = UserData.shared else {
+            print("⚠️ UserData.shared is nil! Deferring load.")
+            return
+        }
 
+        let exerciseId = String(describing: type(of: self)) // Get class name
+        turnDuration = user.turnDurations[exerciseId] ?? 10
+        print("✅ Loaded turnDuration: \(turnDuration!) for \(exerciseId)")
+    }
+
+    func getDuration() -> TimeInterval {
+        if turnDuration == nil {
+            loadTurnDuration() // ✅ Load only when first accessed
+        }
+        return TimeInterval(turnDuration!)
+    }
     /// ✅ Get user's vocal range and filter note frequencies
     func getUsersRange() {
         guard let user = UserData.shared else {

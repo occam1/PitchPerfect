@@ -41,14 +41,14 @@ struct ExerciseRow: View {
             Spacer()
 
             // ✅ Stepper now updates immediately
-            Stepper(value: $localTurnDuration, in: 5...30, step: 1, onEditingChanged: { _ in
-                user.exerciseSettings[exerciseId] = localTurnDuration
+            Stepper(value: $localTurnDuration, in: 1...30, step: 1, onEditingChanged: { _ in
+                user.turnDurations[exerciseId] = localTurnDuration
                 user.save()
             }) {
                 Text("\(localTurnDuration)s")
             }
             .onAppear {
-                localTurnDuration = user.exerciseSettings[exerciseId] ?? 10
+                localTurnDuration = user.turnDurations[exerciseId] ?? 10
             }
             .disabled(isLocked)
 

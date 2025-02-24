@@ -9,9 +9,9 @@ init() {
 
         // Step 2: Load AppDataManager data
         AppDataManager.loadNotesFromJSON()
+        AppDataManager.loadCircleOfFifthsFromJSON()
         AppDataManager.loadKeyNotesFromJSON()
         AppDataManager.loadEnharmonicsFromJSON()
-    print("enharmonics,\(AppDataManager.enharmonics)")
         AppDataManager.loadNoteFrequenciesFromJSON()
         AppDataManager.loadExercisesFromJSON()
         registerAllExercises()
@@ -20,7 +20,6 @@ init() {
     private func registerAllExercises() {
         
         Exercise.registerExercise(name: "ExerciseChromaticStep", instance: ExerciseChromaticStep())
-        //Exercise.registerExercise(name: "ExerciseIntervals", instance: ExerciseIntervals())
         Exercise.registerExercise(name: "ExerciseArpeggiosByKey", instance: ExerciseArpeggiosByKey())
         print("🔄 Registered Exercises: \(Exercise.registeredExercises.keys)")
     }

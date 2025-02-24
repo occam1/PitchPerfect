@@ -1,9 +1,9 @@
 {
     "ExerciseChromaticStep": false,
-    "ExerciseIntervals": false,
+    "ExerciseIntervals": true,
     "ExerciseArpeggiosByKey": false,
-    "ExerciseFifths": false,
-    "ExerciseOctaves": false,
-    "ExerciseScaleSteps": false,
-    "ExerciseRandomNotes": false
+    "ExerciseFifths": true,
+    "ExerciseOctaves": true,
+    "ExerciseScaleSteps": true,
+    "ExerciseRandomNotes": true
 }
