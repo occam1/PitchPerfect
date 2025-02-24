@@ -1,7 +1,7 @@
 {
     "ExerciseChromaticStep": false,
     "ExerciseIntervals": false,
-    "ExerciseArpeggios": false,
+    "ExerciseArpeggiosByKey": false,
     "ExerciseFifths": false,
     "ExerciseOctaves": false,
     "ExerciseScaleSteps": false,

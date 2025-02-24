@@ -9,8 +9,9 @@ class Exercise {
     
     internal var utility = Utility.shared
     internal var userData: UserData?
-    internal var filteredNoteFrequencies: [String: Float] = [:]
-    internal var notes: [(String, Float)] = [] // ✅ Will be populated dynamically
+    internal var filteredNoteFrequencies: [ String: Float] = [:]
+    internal var exerciseNoteFrequencies: [(note: String, frequency: Float)] = [] // ✅ Will be populated dynamically
+    
     internal var currentIndex: Int = 0
     internal var incrementer: Int = 1
 
@@ -64,37 +65,46 @@ class Exercise {
             frequency >= minFreq && frequency <= maxFreq
         }
         
-        self.notes = Array(filteredNoteFrequencies)
-    }
-
-    /// ✅ Fetch the next note in the sequence
-    func nextNote() -> (note: String, frequency: Float)? {
-        if currentIndex >= notes.count {
-            reset()  // ✅ Reset when reaching the end
+        self.exerciseNoteFrequencies = filteredNoteFrequencies.map { (key, value) in
+            (note: key, frequency: value)
         }
-        guard !notes.isEmpty else { return nil }  // ✅ Prevents out-of-bounds errors
-        
-        let next = notes[currentIndex]
-        currentIndex += incrementer
-        return next
-    }
-   
-    /// ✅ Resets the note sequence to reverse direction
-    func reset() {
-        currentIndex = notes.count - 1
-        incrementer *= -1
     }
 
     /// ✅ Finds a note at a given interval (in semitones) above the base note
     internal func getInterval(note: String, semitones: Int) -> (String, Float)? {
-        guard let index = notes.firstIndex(where: { $0.0 == note }) else { return nil }
+        guard let index = exerciseNoteFrequencies.firstIndex(where: { $0.0.dropLast(1) == note }) else { return nil }
         let targetIndex = index + semitones
-
-        if targetIndex < notes.count {
-            return notes[targetIndex]
+    if targetIndex < exerciseNoteFrequencies.count {
+            return exerciseNoteFrequencies[targetIndex]
         }
         return nil
     }
+    
+    
+    /// ✅ Fetch the next note in the sequence
+    func nextNote() -> ((note: String, frequency: Float)?,isLastNote: Bool) {
+        if currentIndex >= exerciseNoteFrequencies.count {
+            reset()  // ✅ Reset when reaching the end
+        }
+        guard !exerciseNoteFrequencies.isEmpty else {
+            
+            return (nil, false) }  // ✅ Prevents out-of-bounds errors
+        
+        let isLast = (currentIndex == exerciseNoteFrequencies.count - 1) // Defaults to false until the last note
+
+        
+        let next = exerciseNoteFrequencies[currentIndex]
+        currentIndex += incrementer
+        return (next, isLast)
+    }
+   
+    /// ✅ Resets the note sequence to reverse direction
+    func reset() {
+        currentIndex = exerciseNoteFrequencies.count - 1
+        incrementer *= -1
+    }
+
+
 
     /// ✅ Description of the exercise (subclasses override this)
     var description: String {

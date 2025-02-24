@@ -21,7 +21,7 @@ class UserData: Codable, ObservableObject {
     private init(userName: String, advancedSettings: AdvancedSettings, selectedExercises: [String]) {
         self.userName = userName
         self.advancedSettings = advancedSettings
-        self.selectedExercises = ["ExerciseChromaticStep"] // ✅ Default exercise on creation
+        self.selectedExercises = ["ExerciseArpeggiosByKey"] // ✅ Default exercise on creation
         self.exerciseSettings = [:] // ✅ Empty dictionary, will be populated dynamically
         populateFrequencies()  // ✅ Automatically set frequencies when UserData is initialized
     }
@@ -43,7 +43,7 @@ class UserData: Codable, ObservableObject {
         self.advancedSettings = try container.decode(AdvancedSettings.self, forKey: .advancedSettings)
         self.lowestFrequency = try container.decodeIfPresent(Float.self, forKey: .lowestFrequency) ?? 0.0
         self.highestFrequency = try container.decodeIfPresent(Float.self, forKey: .highestFrequency) ?? 0.0
-        self.selectedExercises = try container.decodeIfPresent([String].self, forKey: .selectedExercises) ?? ["ExerciseChromaticStep"]
+        self.selectedExercises = try container.decodeIfPresent([String].self, forKey: .selectedExercises) ?? ["ExerciseArpeggiosByKey"]
         self.exerciseSettings = try container.decodeIfPresent([String: Int].self, forKey: .exerciseSettings) ?? [:]
 
         print("decoding selectedExercises: \(self.selectedExercises)")
@@ -91,7 +91,7 @@ class UserData: Codable, ObservableObject {
                 highestNote: "",
                 selectedKey: "C"
             ),
-            selectedExercises: ["ExerciseChromaticStep"] // ✅ Default to only Chromatic Step
+            selectedExercises: ["ExerciseArpeggiosByKey"] // ✅ Default to only Chromatic Step
         )
         shared = newUser
         shared?.populateFrequencies()

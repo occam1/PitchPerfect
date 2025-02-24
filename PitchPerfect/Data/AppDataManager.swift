@@ -84,10 +84,13 @@ class AppDataManager {
         
         do {
             let data = try Data(contentsOf: fileURL)
-            let enharmonics = try JSONDecoder().decode([String:String].self, from: data)
-            if PitchPerfectApp.doDebug {
+            let decodedEnharmonics = try JSONDecoder().decode([String:String].self, from: data)
+            enharmonics=decodedEnharmonics
+           // if PitchPerfectApp.doDebug {
                 print("Loaded \(enharmonics.count) note enharmonics.")
-            }
+            print("enharmonics: \(self.enharmonics)")
+                
+           // }
         } catch {
             print("Error loading enharmonics.json: \(error)")
         }

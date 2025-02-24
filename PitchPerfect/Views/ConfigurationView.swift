@@ -37,6 +37,9 @@ struct ConfigurationView: View {
             .onAppear {
                 autoSelectUser() // ✅ Ensure UI updates immediately
             }
+            .onDisappear {
+                AppManager.shared.resumeProcesses()
+            }
         }
     }
 

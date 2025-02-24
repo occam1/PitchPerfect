@@ -15,7 +15,8 @@ class AppManager: ObservableObject {
     private let pitchCompareModel = PitchCompareModel.shared
     private lazy var toneGetter = ToneGetter()
     private var isRunning = false
-    let exerciseChromaticStep = ExerciseChromaticStep.shared
+    //let exerciseChromaticStep = ExerciseChromaticStep.shared
+    //let exerciseArpeggiosByKey = ExerciseArpeggiosByKey.shared
     @Published var showUserSelection = false  // ✅ Controls the selection screen
 
 
@@ -35,6 +36,9 @@ class AppManager: ObservableObject {
             // ✅ Auto-select if there's only one user, but allow creating a new one
             UserData.setActiveUser(user: users.first!)
             showUserSelection = false
+            if let activeUser = UserData.shared {
+                ExerciseManager.shared.loadUserExercises(for: activeUser) // ✅ Unwrapped safely
+            }
         } else {
             // ✅ Multiple users → Require explicit selection
             showUserSelection = true
@@ -90,7 +94,10 @@ class AppManager: ObservableObject {
  
     func startProcesses() {
         if !isRunning {
-         
+            if let activeUser = UserData.shared {
+                ExerciseManager.shared.loadUserExercises(for: activeUser) // ✅ Unwrapped safely
+            }
+
                 Task {
                     print("Starting Task.")
                     toneGetter.startCapture()
@@ -116,7 +123,7 @@ class AppManager: ObservableObject {
     
     private func runGameLoop() {
         let exerciseManager = ExerciseManager.shared
-        var currentNote: (String,Float)
+      //  var currentNote: (String,Float)
         if PitchPerfectApp.doDebug {
             print("AM rGL isRunning ,\(isRunning)")
         }
@@ -134,24 +141,32 @@ class AppManager: ObservableObject {
                     Thread.sleep(forTimeInterval: 0.1) // Small sleep to avoid high CPU usage
                 }
                 if !isRunning { break } // Exit if the game is stopped while paused
-           // }
-            // Get the next note from the current exercise
-             //guard let nextNote = exerciseManager.currentExercise().nextNote() else {
-             //    exerciseManager.selectNextExercise()
-             //    exerciseManager.resetCurrentExercise()
-             //    continue
-             //}
-            exerciseChromaticStep.startExercise()
-            guard let nextNote = exerciseChromaticStep.nextNote()
-            else {print( "No more notes in exercise")
-                return}
-    
-             currentNote = nextNote
+            
+            guard let exercise = ExerciseManager.shared.currentExercise() else {
+                print("No exercise selected")
+                return
+            }
+            print("starting exercise , \(exercise.exerciseName)")
+            
+            exercise.startExercise()
+           
+            let (nextNote, isLast) = exercise.nextNote() // Destructure the tuple
+
+            guard let validNote = nextNote else {
+                print("No more notes in current exercise, selecting next")
+                ExerciseManager.shared.selectNextExercise()
+                runGameLoop() // Restart with new exercise
+                return
+            }
+            
+
+         //   print("getting next note in exercise , \nextNote")
+           //  currentNote = validNote
           
             // Get the frequency for the current label
   
-            let label =  nextNote.0
-            let frequency = nextNote.1
+            let label =  validNote.0
+            let frequency = validNote.1
         
             // Update the PitchCompareModel with the generated frequency and label
             DispatchQueue.main.async {

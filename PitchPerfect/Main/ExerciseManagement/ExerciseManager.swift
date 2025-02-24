@@ -15,17 +15,32 @@ class ExerciseManager {
     private init() {}
 
     func loadUserExercises(for user: UserData) {
+        print("🔄 loadUserExercises called for user: \(user.userName)")
         exerciseInstances.removeAll()
         selectedExercises.removeAll()
 
         for (exerciseName, isLocked) in AppDataManager.exercises {
             if !isLocked, user.selectedExercises.contains(exerciseName) {
                 selectedExercises.append(exerciseName)
-
+                print("✅ Selected: \(exerciseName)")
                 // ✅ Retrieve from the dynamic registry
-                if let exerciseInstance = Exercise.registeredExercises[exerciseName] {
-                    exerciseInstances[exerciseName] = exerciseInstance
-                }
+                           if let exerciseInstance = Exercise.registeredExercises[exerciseName] {
+                               exerciseInstances[exerciseName] = exerciseInstance
+                               print("✅ Added \(exerciseName) to exerciseInstances")
+                           } else {
+                               print("⚠️ Warning: \(exerciseName) is in selectedExercises but not found in registeredExercises")
+                           }
+            }
+        }
+
+        // ✅ Automatically select "ExerciseArpeggiosByKey" if no exercises are selected
+        if selectedExercises.isEmpty {
+            let defaultExercise = "ExerciseArpeggiosByKey"
+            print("⚠️ No exercises selected, defaulting to \(defaultExercise)")
+
+            if let defaultInstance = Exercise.registeredExercises[defaultExercise] {
+                selectedExercises.append(defaultExercise)
+                exerciseInstances[defaultExercise] = defaultInstance
             }
         }
 
@@ -38,6 +53,9 @@ class ExerciseManager {
     }
 
     func currentExercise() -> Exercise? {
+        print("em current exercises: \(selectedExercises)")
+        print("em current exercise: \(selectedExercises[currentExerciseIndex])")
+        print("em exerciseInstances: \(exerciseInstances.keys)")
         guard !selectedExercises.isEmpty else { return nil }
         return exerciseInstances[selectedExercises[currentExerciseIndex]]
     }

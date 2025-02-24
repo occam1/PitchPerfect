@@ -24,6 +24,7 @@ struct AdvancedSettingsView: View {
                 // Vocal Range Section
                 DisclosureGroup("Vocal Range", isExpanded: $isRangeExpanded) {
                     TextField("Lowest Note", text: $advancedSettings.lowestNote)
+                    TextField("Mid Bridge", text: $advancedSettings.midBridge)
                     TextField("Highest Note", text: $advancedSettings.highestNote)
                 }
 

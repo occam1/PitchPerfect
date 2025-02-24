@@ -27,6 +27,11 @@ struct ExerciseView: View {
                     }
                 }
             }
+            .onDisappear {
+                if let activeUser = UserData.shared {
+                    ExerciseManager.shared.loadUserExercises(for: activeUser) // ✅ Unwrapped safely
+                }
+            }
         }
     }
 }

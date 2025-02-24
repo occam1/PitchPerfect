@@ -57,7 +57,7 @@ class FFTAnalyzer {
         var rawEnergy: Float = 0.0
         vDSP_svesq(samples, 1, &rawEnergy, vDSP_Length(samples.count))
 
-        print("🔋 Raw Energy: \(rawEnergy)")
+      //  print("🔋 Raw Energy: \(rawEnergy)")
         // ✅ Compute total energy of the input signal
         var totalEnergy: Float = 0.0
         vDSP_svesq(samples, 1, &totalEnergy, vDSP_Length(samples.count))
@@ -72,11 +72,11 @@ class FFTAnalyzer {
         let silenceThreshold: Float = max(1e-12, smoothedEnergy * 0.5) // Dynamic, but prevents decay
 
         if smoothedEnergy < silenceThreshold {
-            print("🔇 No significant input detected (smoothed energy: \(smoothedEnergy)). Skipping frequency analysis.")
+      //      print("🔇 No significant input detected (smoothed energy: \(smoothedEnergy)). Skipping frequency analysis.")
             return nil
         }
 
-        print("🎤 Detected sound with smoothed energy: \(smoothedEnergy)")
+       // print("🎤 Detected sound with smoothed energy: \(smoothedEnergy)")
 //////////////////////////////////////////
         let sampleCount = fftSize
         var window = [Float](repeating: 0.0, count: sampleCount)
@@ -118,7 +118,7 @@ class FFTAnalyzer {
                 let peakThreshold: Float = 1e-5 // Adjust based on noise levels
 
                 if maxMagnitude < peakThreshold {
-                    print("🔇 No significant frequency peak detected. Skipping interpolation.")
+                //    print("🔇 No significant frequency peak detected. Skipping interpolation.")
                     return
                 }
                 //---------------------
@@ -126,7 +126,7 @@ class FFTAnalyzer {
                     let frequencyResolution = sampleRate / Float(fftSize)
                     let rawDetectedFrequency = Float(peakIndex) * frequencyResolution
 
-                    print("🔍 Raw Detected Frequency BEFORE any filtering: \(rawDetectedFrequency) Hz")
+               //     print("🔍 Raw Detected Frequency BEFORE any filtering: \(rawDetectedFrequency) Hz")
                 }
       //-----------------------
                 if let peakIndex = magnitudes.firstIndex(of: maxMagnitude) {
@@ -136,7 +136,7 @@ class FFTAnalyzer {
                         referenceFrequency: self.pitchCompareModel.generatedFrequency
                     )
 
-                    print("🎯 Refined dominantFrequency: \(refinedFrequency)")
+                 //   print("🎯 Refined dominantFrequency: \(refinedFrequency)")
                     self.pitchCompareModel.updateDetectedFrequency(refinedFrequency)
 
                     // ✅ Restore pitch feedback
@@ -173,15 +173,15 @@ class FFTAnalyzer {
         let centsThreshold: Float = (referenceFrequency < 500) ? 15.0 : 5.0
         let thresholdHz = referenceFrequency * (pow(2.0, centsThreshold / 1200.0) - 1.0)
 
-        print("🔍 Raw Detected Frequency: \(detectedFrequency) Hz")
-        print("🔹 Clamping Threshold: ±\(thresholdHz) Hz (±\(centsThreshold) cents)")
-        print("🔹 Reference Frequency: \(referenceFrequency) Hz")
+      //  print("🔍 Raw Detected Frequency: \(detectedFrequency) Hz")
+       // print("🔹 Clamping Threshold: ±\(thresholdHz) Hz (±\(centsThreshold) cents)")
+       // print("🔹 Reference Frequency: \(referenceFrequency) Hz")
 
         if abs(detectedFrequency - referenceFrequency) <= thresholdHz {
-            print("✅ Clamping Applied → \(referenceFrequency) Hz")
+      //      print("✅ Clamping Applied → \(referenceFrequency) Hz")
             return referenceFrequency
         } else {
-            print("🎯 Keeping Interpolated Frequency → \(detectedFrequency) Hz")
+        //    print("🎯 Keeping Interpolated Frequency → \(detectedFrequency) Hz")
             return detectedFrequency
         }
     }

@@ -9,8 +9,9 @@ class ExerciseArpeggiosByKey: Exercise {
         super.getUsersRange()  // ✅ Get user's range from base class
         sortNotesByFrequency() // ✅ Ensure notes are sorted
     }
+    
     func sortNotesByFrequency() {
-        notes.sort { (a: (String, Float), b: (String, Float)) in
+        exerciseNoteFrequencies.sort { (a: (String, Float), b: (String, Float)) in
             a.1 < b.1  // ✅ Sort by frequency (Float), which is the second element
         }
     }
@@ -25,8 +26,7 @@ class ExerciseArpeggiosByKey: Exercise {
             currentIndex = 0
     }
 
-    func generateArpeggioNotes()  {
-        print("genArpNotes")
+    func generateArpeggioNotes() {
         arpeggioNotes.removeAll() // Start fresh
 
         for key in AppDataManager.keyNotes.keys {
@@ -34,47 +34,66 @@ class ExerciseArpeggiosByKey: Exercise {
                 print("Invalid key data for \(key)")
                 continue
             }
-            print("genArpNotes key \(key)")
-            let root = keyNotes[0]  // Root note
-            let third = keyNotes[2] // Major third
-            let fifth = keyNotes[4] // Perfect fifth
-            print("rtf,\(root),\(third),\(fifth)")
+
+            // Store original note names (could be flats)
+            let originalRoot = keyNotes[0]
+            let originalThird = keyNotes[2]
+            let originalFifth = keyNotes[4]
+
+            // Convert flats to sharps for lookup
+            let rootLookup = AppDataManager.enharmonics[originalRoot] ?? originalRoot
+            let thirdLookup = AppDataManager.enharmonics[originalThird] ?? originalThird
+            let fifthLookup = AppDataManager.enharmonics[originalFifth] ?? originalFifth
+
             // Find first and last occurrence of root and fifth
-            // Find first and last occurrence of root and fifth
-            guard let firstIndex = notes.firstIndex(where: { $0.0.dropLast(1) == root }),
-                  let lastIndex = notes.lastIndex(where: { $0.0.dropLast(1) == fifth }),
-                      lastIndex > firstIndex else {
-                    print("Invalid indices for key \(key)")
-                    continue
-                }
-            print("genArpNotes before for indices ,\(firstIndex),\(lastIndex )")
-          
+            guard let firstIndex = exerciseNoteFrequencies.firstIndex(where: { $0.0.dropLast(1) == rootLookup }),
+                  let lastIndex = exerciseNoteFrequencies.lastIndex(where: { $0.0.dropLast(1) == fifthLookup }),
+                  lastIndex > firstIndex else {
+                print("Invalid indices for key \(key)")
+                continue
+            }
+
             // Process notes from firstIndex to lastIndex
             for index in stride(from: firstIndex, through: lastIndex, by: 12) {
-                if index < notes.count { arpeggioNotes.append(notes[index]) } // Root
+                       if index < exerciseNoteFrequencies.count {
+                           let noteOctave = exerciseNoteFrequencies[index].0 // Extract octave from matched note
+                           let storedNote = originalRoot + noteOctave.suffix(1) // Append the octave to the original flat name
+                           arpeggioNotes.append((storedNote, exerciseNoteFrequencies[index].1)) // Store original flat name + octave
+                       }
 
-                let thirdIndex = index + 4
-                if thirdIndex <= lastIndex, thirdIndex < notes.count, notes[thirdIndex].0.dropLast(1) == third {
-                    arpeggioNotes.append(notes[thirdIndex]) // Third
-                }
+                       let thirdIndex = index + 4
+                       if thirdIndex <= lastIndex, thirdIndex < exerciseNoteFrequencies.count,
+                          exerciseNoteFrequencies[thirdIndex].0.dropLast(1) == thirdLookup {
+                           let noteOctave = exerciseNoteFrequencies[thirdIndex].0
+                           let storedNote = originalThird + noteOctave.suffix(1)
+                           arpeggioNotes.append((storedNote, exerciseNoteFrequencies[thirdIndex].1))
+                       }
 
-                let fifthIndex = index + 8
-                if fifthIndex <= lastIndex, fifthIndex < notes.count, notes[fifthIndex].0.dropLast(1) == fifth {
-                    arpeggioNotes.append(notes[fifthIndex]) // Fifth
-                }
-                print("genArpNotes ,\(arpeggioNotes) " )
+                       let fifthIndex = index + 7
+                       if fifthIndex <= lastIndex, fifthIndex < exerciseNoteFrequencies.count,
+                          exerciseNoteFrequencies[fifthIndex].0.dropLast(1) == fifthLookup {
+                           let noteOctave = exerciseNoteFrequencies[fifthIndex].0
+                           let storedNote = originalFifth + noteOctave.suffix(1)
+                           arpeggioNotes.append((storedNote, exerciseNoteFrequencies[fifthIndex].1))
+                       }
             }
         }
     }
-
-    override func nextNote() -> (note: String, frequency: Float)? {
+    override func nextNote() -> ((note: String, frequency: Float)?, isLast:Bool)  {
         currentIndex  = currentIndex + 1
         if currentIndex >= arpeggioNotes.count {
             currentIndex = 0
         }
-        if arpeggioNotes.isEmpty { return nil }  // No notes to return
+        if arpeggioNotes.isEmpty { return (nil, false) }  // No notes to return
+        
+       //guard !exerciseNoteFrequencies.isEmpty else {
+       //    var emptyNote : (String,Float) = (note: nil as String, frequency: 0.0)
+       //    return (emptyNote, false) }  // ✅ Prevents out-of-bounds errors
+        
         let next = arpeggioNotes[currentIndex]
-        return next
+        let isLast = (currentIndex == arpeggioNotes.count - 1) // Defaults to false until the last note
+
+        return (next, isLast)
     }
     
     override var description: String {

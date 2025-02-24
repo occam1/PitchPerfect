@@ -33,7 +33,6 @@
 		4D2090A62D4887EE00883D66 /* Exceptions for "PitchPerfect" folder in "PitchPerfect" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Main/ExerciseManagement/ExerciseArpeggioByKey.swift,
 				Main/ExerciseManagement/ExerciseDiatonicStepFifths.swift,
 			);
 			target = 4D1478002D3F3A5600E15A93 /* PitchPerfect */;
