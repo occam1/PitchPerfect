@@ -20,7 +20,11 @@ init() {
     private func registerAllExercises() {
         
         Exercise.registerExercise(name: "ExerciseChromaticStep", instance: ExerciseChromaticStep())
+        Exercise.registerExercise(name: "ExerciseMajorThirdsChromaticStep", instance: ExerciseMajorThirdsChromaticStep())
+        Exercise.registerExercise(name: "ExercisePerfectFourthsChromaticStep", instance: ExercisePerfectFourthsChromaticStep())
+        Exercise.registerExercise(name: "ExercisePerfectFifthsChromaticStep", instance: ExercisePerfectFifthsChromaticStep())
         Exercise.registerExercise(name: "ExerciseArpeggiosByKey", instance: ExerciseArpeggiosByKey())
+        Exercise.registerExercise(name: "ExerciseRandomNotes", instance: ExerciseRandomNotes())
         print("🔄 Registered Exercises: \(Exercise.registeredExercises.keys)")
     }
     

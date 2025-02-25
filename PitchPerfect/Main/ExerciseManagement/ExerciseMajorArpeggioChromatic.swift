@@ -95,7 +95,7 @@ class ExerciseMajorArpeggioChromatic: Exercise {
         return """
         Basic exercise to step through the keys, clockwise on the circle of fifths,
         and for each key, go thru the root, third and fifth in each octave that 
-        is in your range.
+        is in the singer's range.
         """
     }
 }

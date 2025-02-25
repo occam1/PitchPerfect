@@ -17,9 +17,7 @@ class AppManager: ObservableObject {
     private var isRunning = false
     private let exerciseManager = ExerciseManager.shared
     private var exerciseTurnDuration: TimeInterval = 10
-    //let exerciseChromaticStep = ExerciseChromaticStep.shared
-    //let exerciseArpeggiosByKey = ExerciseArpeggiosByKey.shared
-    @Published var showUserSelection = false  // ✅ Controls the selection screen
+     @Published var showUserSelection = false  // ✅ Controls the selection screen
 
 
     public init() {
@@ -122,13 +120,13 @@ class AppManager: ObservableObject {
     func resumeProcesses() {
         startProcesses()
     }
-    
+   
     private func runGameLoop() {
       //  var currentNote: (String,Float)
         if PitchPerfectApp.doDebug {
             print("AM rGL isRunning ,\(isRunning)")
         }
-         guard let exercise = exerciseManager.currentExercise() else {
+         guard var exercise = exerciseManager.currentExercise() else {
              print("No exercise selected")
              return
          }
@@ -154,7 +152,7 @@ class AppManager: ObservableObject {
             //    print("No exercise selected")
             //    return
            // }
-           // print("starting exercise , \(exercise.exerciseName)")
+            print("starting exercise , \(exercise.exerciseName)")
             
             //exercise.startExercise()
            
@@ -167,7 +165,8 @@ class AppManager: ObservableObject {
                 return
             }
             
-
+            print("mid  rGL isLast, \(isLast)")
+                    print("valid note , \(validNote)")
          //   print("getting next note in exercise , \nextNote")
            //  currentNote = validNote
           
@@ -196,19 +195,22 @@ class AppManager: ObservableObject {
             }
        
             tonePlayer.stopPlaying()
-            
+            print("end  rGL isLast, \(isLast)")
             if isLast {
                 exerciseManager.selectNextExercise()
-                guard let exercise = exerciseManager.currentExercise() else {
+                guard let newExercise = exerciseManager.currentExercise() else {
                     print("No exercise selected")
                     return
                 }
+                exercise = newExercise
                 print("starting exercise , \(exercise.exerciseName)")
                 exercise.startExercise()
                 exercise.loadTurnDuration()
                 exerciseTurnDuration =    exercise.getDuration()
                 print("isLast - for duration of \(exerciseTurnDuration)")
+                print("exercise name, \(exercise.exerciseName)")
             }
+            print("exercise name, \(exercise.exerciseName)")
             // Pause between pitches
               if pitchCompareModel.isAutomatic {
                   print("Pausing for user to catch their breath")

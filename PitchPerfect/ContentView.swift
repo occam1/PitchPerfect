@@ -1,18 +1,31 @@
 import SwiftUI
-import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var appManager: AppManager
     @ObservedObject private var pitchCompareModel = PitchCompareModel.shared
+    @ObservedObject var exerciseManager = ExerciseManager.shared
 
     @State private var showSettings = false
     @State private var showUserSelection = false
     @State private var users: [UserData] = []
     @State private var selectedUser: UserData?
+    @State private var exerciseName: String = "No Exercise Selected"
 
     var body: some View {
         NavigationView {
             VStack {
+                // Title + Exercise Name
+                VStack {
+                    Text("Pitch Practice")
+                        .font(.largeTitle)
+                        .bold()
+                    
+                    Text(exerciseManager.currentExerciseName) // ✅ Exercise name below title
+                        .font(.title2)
+                        .foregroundColor(.gray)
+                }
+                .padding(.top)
+
                 // Pitch Comparison View
                 PitchComparisonView()
                     .padding()
@@ -45,7 +58,7 @@ struct ContentView: View {
 
                 Spacer()
             }
-            .navigationTitle("Pitch Practice - \(UserData.shared?.userName ?? "No User")")
+            .navigationBarTitleDisplayMode(.inline) // ✅ Ensures space for content
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Settings") {
@@ -62,19 +75,18 @@ struct ContentView: View {
                 )
             }
             .sheet(isPresented: $showUserSelection) {
-                // ✅ Forces user selection before using the app
                 UserSelectionView(users: $users, selectedUser: $selectedUser, showUserSelection: $showUserSelection)
             }
         }
         .onAppear {
             Init.configureAudioSession()
             loadUsers()
-            //appManager.checkUserStatus()
-                
+           
         }
     }
 
-    // MARK: - Button Actions
+    // MARK: - Helper Functions
+
 
     private func toggleMode() {
         pitchCompareModel.isAutomatic.toggle()
@@ -100,15 +112,15 @@ struct ContentView: View {
     }
 
     private func loadUsers() {
-        users = UserDataManager.loadAllUsers() // ✅ Load all users at start
+        users = UserDataManager.loadAllUsers()
 
         if let lastUserName = UserDefaults.standard.string(forKey: "lastUser"),
            let lastUser = users.first(where: { $0.userName == lastUserName }) {
-            UserData.setActiveUser(user: lastUser) // ✅ Set last active user
+            UserData.setActiveUser(user: lastUser)
             selectedUser = lastUser
             showUserSelection = true
         } else {
-            showUserSelection = true // ✅ Force user selection if no last user
+            showUserSelection = true
         }
     }
 }

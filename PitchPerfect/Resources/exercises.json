@@ -1,9 +1,9 @@
 {
     "ExerciseChromaticStep": false,
-    "ExerciseIntervals": true,
+    "ExerciseMajorThirdsChromaticStep": false,
+    "ExercisePerfectFourthsChromaticStep": false,
+    "ExercisePerfectFifthsChromaticStep": false,
     "ExerciseArpeggiosByKey": false,
-    "ExerciseFifths": true,
-    "ExerciseOctaves": true,
     "ExerciseScaleSteps": true,
-    "ExerciseRandomNotes": true
+    "ExerciseRandomNotes": false
 }

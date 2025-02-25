@@ -7,7 +7,7 @@
 import Foundation
 class Exercise {
     static var registeredExercises: [String: Exercise] = [:] // ✅ Stores all exercise instances
-    
+    static var registeredDescriptions: [String: String] = [:] // ✅ Store descriptions for all exercises
     internal var utility = Utility.shared
     internal var userData: UserData?
     internal var filteredNoteFrequencies: [ String: Float] = [:]
@@ -38,6 +38,7 @@ class Exercise {
     /// ✅ Registers the exercise instance dynamically
     static func registerExercise(name: String, instance: Exercise) {
         registeredExercises[name] = instance
+        registeredDescriptions[name] = instance.getDescription()
     }
 
     /// ✅ Initializes and automatically registers the exercise
@@ -94,7 +95,7 @@ class Exercise {
 
     /// ✅ Finds a note at a given interval (in semitones) above the base note
     internal func getInterval(note: String, semitones: Int) -> (String, Float)? {
-        guard let index = exerciseNoteFrequencies.firstIndex(where: { $0.0.dropLast(1) == note }) else { return nil }
+        guard let index = exerciseNoteFrequencies.firstIndex(where: { $0.0 == note }) else { return nil }
         let targetIndex = index + semitones
     if targetIndex < exerciseNoteFrequencies.count {
             return exerciseNoteFrequencies[targetIndex]
@@ -105,6 +106,7 @@ class Exercise {
     
     /// ✅ Fetch the next note in the sequence
     func nextNote() -> ((note: String, frequency: Float)?,isLastNote: Bool) {
+        print("base-ex nn ,\(currentIndex)  ")
         if currentIndex >= exerciseNoteFrequencies.count {
             reset()  // ✅ Reset when reaching the end
         }
@@ -122,10 +124,13 @@ class Exercise {
    
     /// ✅ Resets the note sequence to reverse direction
     func reset() {
+        print("base-ex reset ,\(currentIndex)  ")
         currentIndex = exerciseNoteFrequencies.count - 1
         incrementer *= -1
     }
-
+    public func getDescription() -> String {
+        return description
+    }
 
 
     /// ✅ Description of the exercise (subclasses override this)

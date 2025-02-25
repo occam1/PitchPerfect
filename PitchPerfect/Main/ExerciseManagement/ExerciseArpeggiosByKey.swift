@@ -25,6 +25,7 @@ class ExerciseArpeggiosByKey: Exercise {
     }
     
     override func reset() {
+        print("EABK-ex reset ,\(currentIndex)  ")
             currentIndex = 0
     }
 
@@ -81,10 +82,11 @@ class ExerciseArpeggiosByKey: Exercise {
                        }
             }
         }
-        //print("arpeggioNotes: \(arpeggioNotes)")
+        print("arpeggioNotes: \(arpeggioNotes)")
     }
     override func nextNote() -> ((note: String, frequency: Float)?, isLast:Bool)  {
-        
+        print("currentIndex: \(currentIndex)")
+        print("arpeggioNotes.count: \(arpeggioNotes.count)")
         if currentIndex >= arpeggioNotes.count {
             currentIndex = 0
         }
@@ -96,16 +98,21 @@ class ExerciseArpeggiosByKey: Exercise {
         
         let next = arpeggioNotes[currentIndex]
         currentIndex  = currentIndex + 1
+        print("incrementing currentIndex: \(currentIndex)")
         let isLast = (currentIndex == arpeggioNotes.count) // Defaults to false until the last note
-
+        print("EABK isLast: \(isLast)")
         return (next, isLast)
+    }
+    
+    public override func getDescription() -> String {
+        return description
     }
     
     override var description: String {
         return """
         Basic exercise to step through the keys, clockwise on the circle of fifths,
         and for each key, go thru the root, third and fifth in each octave that 
-        is in your range.
+        is in the singer's range.
         """
     }
 }

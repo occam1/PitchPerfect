@@ -13,12 +13,13 @@ class ExerciseChromaticStep: Exercise {
     override init() {
         super.init()
         print("✅ ExerciseChromaticStep initialized") // Debugging print
-        Exercise.registerExercise(name: "ExerciseChromaticStep", instance: self)
+        //Exercise.registerExercise(name: "ExerciseChromaticStep", instance: self)
      
     }
 
 
     override func reset() {
+        print("ECS reset")
         currentIndex = 0
         incrementer = 1
     }
@@ -42,12 +43,15 @@ class ExerciseChromaticStep: Exercise {
         }
         guard !exerciseNoteFrequencies.isEmpty else { return (nil, false) }  // ✅ Prevent out-of-bounds errors
         let isLast = (currentIndex == 1 && incrementer == -1) // Defaults to false until the last note
-
+        print("ECS isLast: \(isLast)")
         let next = exerciseNoteFrequencies[currentIndex]
         currentIndex += incrementer
         
         return (next, isLast)
 
+    }
+    public override func getDescription() -> String {
+        return description
     }
     
 

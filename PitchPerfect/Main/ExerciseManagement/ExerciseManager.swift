@@ -5,13 +5,16 @@
 //  Created by Mark Hall on 1/27/25.
 //
 import Foundation
-class ExerciseManager {
+import Combine
+class ExerciseManager: ObservableObject {
     static let shared = ExerciseManager()
     
-    private var exerciseInstances: [String: Exercise] = [:]
+    public var exerciseInstances: [String: Exercise] = [:]
     private var selectedExercises: [String] = []
     private var currentExerciseIndex = 0
 
+    // ✅ Public variable to store the current exercise name
+    @Published var currentExerciseName: String = "No Exercise Selected"
     private init() {}
 
     func loadUserExercises(for user: UserData) {
@@ -45,11 +48,26 @@ class ExerciseManager {
         }
 
         print("✅ Loaded \(selectedExercises.count) exercises for \(user.userName).")
+        // ✅ Ensure the exercise name updates immediately
+        updateExerciseName()
     }
 
     func selectNextExercise() {
         guard !selectedExercises.isEmpty else { return }
-        currentExerciseIndex = (currentExerciseIndex + 1) % selectedExercises.count
+        
+        if selectedExercises.count == 1 {
+            resetCurrentExercise()
+        } else {
+            currentExerciseIndex = (currentExerciseIndex + 1) % selectedExercises.count
+            resetCurrentExercise()
+        }
+        print("inside selectNextExercise")
+        updateExerciseName() // ✅ Only update when switching exercises
+    }
+
+    func resetCurrentExercise() {
+        currentExercise()?.reset()
+        updateExerciseName() // ✅ Ensure name updates when an exercise resets
     }
 
     func currentExercise() -> Exercise? {
@@ -57,11 +75,20 @@ class ExerciseManager {
         
         let exercise = exerciseInstances[selectedExercises[currentExerciseIndex]]
         exercise?.reset() // ✅ Reset before returning to ensure it's always ready
-        
         return exercise
     }
 
-    func resetCurrentExercise() {
-        currentExercise()?.reset()
+    
+    // ✅ Updates the `currentExerciseName` whenever the exercise changes
+    private func updateExerciseName() {
+        DispatchQueue.main.async {
+            self.currentExerciseName = self.currentExercise()?.exerciseName ?? "No Exercise Selected"
+            print("currentExerciseName, \(self.$currentExerciseName)")
+            print("currentExerciseName, \(self.currentExerciseName)")
+            print("currentExerciseName, \(self.currentExerciseName)")
+            print("currentExerciseName, \(self.currentExerciseName)")
+            print("currentExerciseName, \(self.currentExerciseName)")
+            print("currentExerciseName, \(self.currentExerciseName)")
+        }
     }
 }
