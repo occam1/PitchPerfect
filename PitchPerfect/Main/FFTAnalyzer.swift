@@ -11,7 +11,6 @@ import AVFoundation
 class FFTAnalyzer {
     static let shared = FFTAnalyzer()
     let pitchCompareModel = PitchCompareModel.shared
-
     private var fftSize: Int = 65536
     private let sampleRate: Float
     private let log2n: vDSP_Length
@@ -19,7 +18,7 @@ class FFTAnalyzer {
 
     // ✅ Initialize once and reuse
     private init() {
-        self.sampleRate = Float(PitchCompareModel.shared.detectedSampleRate)
+        self.sampleRate = Float(pitchCompareModel.detectedSampleRate)
         self.log2n = vDSP_Length(log2(Float(fftSize)))
         self.fftSetup = vDSP_create_fftsetup(log2n, Int32(kFFTRadix2)) // ✅ Create FFT setup once
 
@@ -97,7 +96,8 @@ class FFTAnalyzer {
                 var magnitudes = [Float](repeating: 0.0, count: sampleCount / 2)
                 vDSP_zvmags(&splitComplex, 1, &magnitudes, 1, vDSP_Length(sampleCount / 2))
 
-                let samplingRate: Float = 48000.0
+                let samplingRate: Float = self.sampleRate
+                
                 let frequencyResolution = samplingRate / Float(sampleCount)
                 let referenceFrequency = self.pitchCompareModel.generatedFrequency
 

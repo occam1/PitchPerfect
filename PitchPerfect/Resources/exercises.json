@@ -4,6 +4,6 @@
     "ExercisePerfectFourthsChromaticStep": false,
     "ExercisePerfectFifthsChromaticStep": false,
     "ExerciseArpeggiosByKey": false,
-    "ExerciseScaleSteps": true,
+    "ExerciseScaleSteps": false,
     "ExerciseRandomNotes": false
 }

@@ -89,7 +89,8 @@ class UserData: Codable, ObservableObject {
                 lowestNote: "",
                 midBridge: "",
                 highestNote: "",
-                selectedKey: "C"
+                selectedKey: "C",
+                audioFeedbackEnabled: true
             ),
             selectedExercises: ["ExerciseArpeggiosByKey"] // ✅ Default to only Chromatic Step
         )

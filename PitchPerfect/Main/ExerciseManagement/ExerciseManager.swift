@@ -84,11 +84,7 @@ class ExerciseManager: ObservableObject {
         DispatchQueue.main.async {
             self.currentExerciseName = self.currentExercise()?.exerciseName ?? "No Exercise Selected"
             print("currentExerciseName, \(self.$currentExerciseName)")
-            print("currentExerciseName, \(self.currentExerciseName)")
-            print("currentExerciseName, \(self.currentExerciseName)")
-            print("currentExerciseName, \(self.currentExerciseName)")
-            print("currentExerciseName, \(self.currentExerciseName)")
-            print("currentExerciseName, \(self.currentExerciseName)")
+
         }
     }
 }

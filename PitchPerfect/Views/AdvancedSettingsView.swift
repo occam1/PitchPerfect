@@ -14,8 +14,8 @@ struct AdvancedSettingsView: View {
     @State private var keepLastDays: Int = 30 // Default retention period
     @State private var isRangeExpanded: Bool = true
     @State private var isKeySelectionExpanded: Bool = false
-    @State private var isDataManagementExpanded: Bool = false
-
+    @State private var isFeedbackExpanded: Bool = false
+    
     let retentionPeriods = [7, 30, 60, 90] // Available options for retention
 
     var body: some View {
@@ -34,6 +34,10 @@ struct AdvancedSettingsView: View {
                                     keys: AppDataManager.notes,
                                    selectedKey: $advancedSettings.selectedKey
                                )
+                           }
+                // AudioFeedback Section
+                           DisclosureGroup("Feedback", isExpanded: $isFeedbackExpanded) {
+                               Toggle("Enable Audio Feedback", isOn: $advancedSettings.audioFeedbackEnabled)
                            }
             }
             .navigationTitle("Advanced Settings")
