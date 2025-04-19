@@ -11,6 +11,7 @@ class AppManager: ObservableObject {
     static let shared = AppManager() // Define the singleton instance
     let utility = Utility.shared
     let audioSessionManager = AudioSessionManager.shared
+    let speechify = TTSManager.shared
     private let tonePlayer = TonePlayer.shared
     private let pitchCompareModel = PitchCompareModel.shared
     private lazy var toneGetter = ToneGetter()
@@ -101,7 +102,7 @@ class AppManager: ObservableObject {
                 Task {
                     print("Starting Task.")
                     toneGetter.startCapture()
-                    tonePlayer.startPlayingTone(frequency: 440.0) // Example tone
+                   // tonePlayer.startPlayingTone(frequency: 440.0) // Example tone
                     isRunning = true
                     runGameLoop()
                 }
@@ -183,7 +184,7 @@ class AppManager: ObservableObject {
             // Play the tone
             print("Running game loop, playing tone refFreq,\(frequency) ")
             print("for duration of \(exerciseTurnDuration)")
-            
+            speechify
             tonePlayer
                 .startPlayingTone(
                     frequency: frequency,

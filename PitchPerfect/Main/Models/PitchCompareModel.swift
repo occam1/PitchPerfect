@@ -28,6 +28,7 @@ class PitchCompareModel: ObservableObject {
     
     @Published var detectedSampleRate: Double
     @Published var fftSize: Int
+    @Published var pitchErrorCents: Float = 0.0
 
     private init() {
         self.detectedSampleRate = audioSessionManager.audioSession.sampleRate
@@ -49,6 +50,9 @@ class PitchCompareModel: ObservableObject {
         }
         
     }
+    
+
+    
     func updateGeneratedFrequency(to frequency: Float , label: String , play: Bool) {
         self.playing = play
         lastFeedback = nil

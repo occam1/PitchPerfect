@@ -143,6 +143,7 @@ class FFTAnalyzer {
                     let pitchErrorCents = 1200 * log2(refinedFrequency / referenceFrequency)
                     DispatchQueue.main.async {
                         AudioFeedback.shared.playFeedbackTone(for: pitchErrorCents)
+                        self.pitchCompareModel.pitchErrorCents = pitchErrorCents
                     }
 
                     dominantFrequency = refinedFrequency

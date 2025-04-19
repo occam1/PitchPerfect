@@ -26,6 +26,8 @@ init() {
         Exercise.registerExercise(name: "ExerciseArpeggiosByKey", instance: ExerciseArpeggiosByKey())
         Exercise.registerExercise(name: "ExerciseRandomNotes", instance: ExerciseRandomNotes())
         Exercise.registerExercise(name: "ExerciseScaleSteps", instance: ExerciseScaleSteps())
+        Exercise.registerExercise(name: "ExerciseBridgeFifthsStepper", instance: ExerciseBridgeFifthsStepper())
+        Exercise.registerExercise(name: "ExerciseBridgeOctaveStepper", instance: ExerciseBridgeOctaveStepper())
         print("🔄 Registered Exercises: \(Exercise.registeredExercises.keys)")
     }
     
